@@ -1,5 +1,8 @@
 package com.healingsys.entities;
 
+import com.healingsys.entities.enums.BloodType;
+import com.healingsys.entities.enums.Role;
+import com.healingsys.entities.enums.UserStatus;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;

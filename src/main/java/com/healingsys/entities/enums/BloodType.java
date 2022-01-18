@@ -1,4 +1,4 @@
-package com.healingsys.entities;
+package com.healingsys.entities.enums;
 
 public enum BloodType {
     NULL_NEGATIVE("0-"),
