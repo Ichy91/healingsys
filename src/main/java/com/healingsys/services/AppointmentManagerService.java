@@ -1,27 +1,18 @@
 package com.healingsys.services;
 
-import com.healingsys.entities.enums.NameOfDay;
-import lombok.AllArgsConstructor;
+import com.healingsys.util.Day;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
-import java.util.Set;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class AppointmentManagerService {
 
-    private LocalTime open;
-    private LocalTime closed;
-    private int maxGeneratedDays;
-    private double slotLengthInHour;
-    private int slotMaxCapacity;
-    private Set<NameOfDay> closedDay;
-    private List<com.healingsys.util.Day> days;
+    private final AppointmentService appointmentService;
+    private List<Day> days;
 
     public void daisHandler(LocalDate toDayDate) {}
 
