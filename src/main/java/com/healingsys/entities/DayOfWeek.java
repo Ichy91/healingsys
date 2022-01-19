@@ -1,6 +1,6 @@
 package com.healingsys.entities;
 
-import com.healingsys.entities.enums.Day;
+import com.healingsys.entities.enums.NameOfDay;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,5 +18,5 @@ public class DayOfWeek {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private Day day;
+    private NameOfDay day;
 }
