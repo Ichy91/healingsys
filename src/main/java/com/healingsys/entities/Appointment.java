@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Data
@@ -27,7 +28,7 @@ public class Appointment {
     private LocalDate date;
 
     @NotNull
-    private String hour;
+    private LocalTime hour;
 
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
