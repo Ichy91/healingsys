@@ -41,7 +41,7 @@ public class AppointmentManagerService {
     }
 
     private void generateDay(LocalDate today) {
-        Day actualDay = new Day(today, details);
+        Day actualDay = new Day(today, details, appointmentService);
         actualDay.dayHandler();
         days.add(actualDay);
     }
