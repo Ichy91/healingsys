@@ -32,6 +32,6 @@ public class OperationDetails {
     @NotNull
     private int slotMaxCapacity;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL)
     private Set<DayOfWeek> closedDay;
 }
