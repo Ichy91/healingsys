@@ -2,6 +2,7 @@ package com.healingsys.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.healingsys.entities.OperationDetails;
+import com.healingsys.services.AppointmentService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,15 +17,18 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Day {
-
-    @JsonIgnore
-    private OperationDetails details;
     private LocalDate day;
     private List<Slot> slots;
 
-    public Day(LocalDate day, OperationDetails details) {
+    @JsonIgnore
+    private OperationDetails details;
+    @JsonIgnore
+    private AppointmentService appointmentService;
+
+    public Day(LocalDate day, OperationDetails details, AppointmentService appointmentService) {
         this.day = day;
         this.details = details;
+        this.appointmentService = appointmentService;
     }
 
 
@@ -40,16 +44,26 @@ public class Day {
         LocalTime time = details.getOpen();
 
         for (int i = 0; i < slotsNumberOfDay; i++) {
-            slots.add(generateSlot(details.getSlotMaxCapacity(), time));
+            slots.add(generateSlot(time));
             time = time.plusMinutes(slotLengthInMinute);
         }
     }
 
-    private Slot generateSlot(int capacity, LocalTime time) {
+    private Slot generateSlot(LocalTime time) {
         Slot actualSlot = new Slot();
-        actualSlot.setCapacity(capacity);
         actualSlot.setTime(time);
+        slotSetting(actualSlot);
+
         return actualSlot;
+    }
+
+    private void slotSetting(Slot slot) {
+        int numberOfReservation = appointmentService.getReservedAppointmentsByDayAndHour(day, slot.getTime()).size();
+        slot.setCapacity(details.getSlotMaxCapacity());
+        slot.setReserved(numberOfReservation);
+
+        if (numberOfReservation >= slot.getCapacity()) slot.setSlotStatus(SlotStatus.INACTIVE);
+        else slot.setSlotStatus(SlotStatus.ACTIVE);
     }
 
     private int calculateNumberOfSlots() {
