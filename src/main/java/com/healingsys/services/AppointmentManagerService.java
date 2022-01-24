@@ -23,13 +23,15 @@ public class AppointmentManagerService {
     public List<Day> appointmentHandler(LocalDateTime toDayDateTime) {
         details = appointmentService.getOperationDetails().get();
 
-        if (days == null || days.isEmpty()) setupDays(toDayDateTime);
+        if (days == null || days.isEmpty()) days = new ArrayList<>();
+        else days.clear();
+
+        setupDays(toDayDateTime);
 
         return getDays();
     }
 
     private void setupDays(LocalDateTime toDayDateTime) {
-        days = new ArrayList<>();
         LocalDate today = toDayDateTime.toLocalDate();
 
         while (days.size() < details.getMaxGeneratedDays()) {
