@@ -62,7 +62,10 @@ public class Day {
         slot.setCapacity(details.getSlotMaxCapacity());
         slot.setReserved(numberOfReservation);
 
-        if (numberOfReservation >= slot.getCapacity()) slot.setSlotStatus(SlotStatus.INACTIVE);
+        if (numberOfReservation >= slot.getCapacity() ||
+                slot.getTime().compareTo(LocalTime.now()) <= 0 && this.day.compareTo(LocalDate.now()) <= 0) {
+            slot.setSlotStatus(SlotStatus.INACTIVE);
+        }
         else slot.setSlotStatus(SlotStatus.ACTIVE);
     }
 
