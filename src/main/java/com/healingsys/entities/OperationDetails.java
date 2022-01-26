@@ -1,5 +1,6 @@
 package com.healingsys.entities;
 
+import com.healingsys.entities.enums.Status;
 import lombok.*;
 
 import javax.persistence.*;
@@ -18,6 +19,9 @@ public class OperationDetails {
     private Long id;
 
     @NotNull
+    private String name;
+
+    @NotNull
     private LocalTime open;
 
     @NotNull
@@ -34,4 +38,8 @@ public class OperationDetails {
 
     @ManyToMany(cascade = CascadeType.ALL)
     private Set<DayOfWeek> closedDay;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private Status status;
 }
