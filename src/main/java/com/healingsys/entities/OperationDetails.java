@@ -2,9 +2,12 @@ package com.healingsys.entities;
 
 import com.healingsys.entities.enums.Status;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 import java.time.LocalTime;
 import java.util.Set;
 
@@ -17,6 +20,13 @@ public class OperationDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Timestamp createdDate;
+
+    @UpdateTimestamp
+    private Timestamp updatedDate;
 
     @NotNull
     private String name;
