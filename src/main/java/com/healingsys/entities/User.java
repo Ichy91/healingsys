@@ -2,7 +2,7 @@ package com.healingsys.entities;
 
 import com.healingsys.entities.enums.BloodType;
 import com.healingsys.entities.enums.Role;
-import com.healingsys.entities.enums.UserStatus;
+import com.healingsys.entities.enums.Status;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
@@ -54,7 +54,7 @@ public class User {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private UserStatus status;
+    private Status status;
 
     @NotNull
     @Enumerated(EnumType.STRING)
