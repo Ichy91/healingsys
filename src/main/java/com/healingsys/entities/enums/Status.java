@@ -1,6 +1,6 @@
 package com.healingsys.entities.enums;
 
-public enum UserStatus {
+public enum Status {
     ACTIVE,
     INACTIVE,
     DELETED
