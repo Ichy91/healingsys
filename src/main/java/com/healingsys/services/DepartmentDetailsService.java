@@ -83,6 +83,11 @@ public class DepartmentDetailsService {
     }
 
     private List<SimpleDepartmentDetailsDto> createSimpleDtoList(List<DepartmentDetails> departmentDetailsList) {
+
+        if (departmentDetailsList.isEmpty()) {
+            throw new NoSuchElementException("The list is empty!");
+        }
+
         List<SimpleDepartmentDetailsDto> simpleDepartmentDetailsDtoList = new ArrayList<>();
 
         for (var operationDetails: departmentDetailsList) {
