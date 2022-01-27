@@ -24,7 +24,7 @@ public class DepartmentDetailsService {
         List<DepartmentDetails> actives = departmentDetailsRepository.findAllByStatus(Status.ACTIVE);
 
         if (actives.isEmpty()) {
-            throw new NoSuchElementException("There is no such Operations!");
+            throw new NoSuchElementException("There is no such Departments!");
         }
 
         return createSimpleDtoList(actives);
@@ -34,7 +34,7 @@ public class DepartmentDetailsService {
         List<DepartmentDetails> inactivates = departmentDetailsRepository.findAllByStatus(Status.INACTIVE);
 
         if (inactivates.isEmpty()) {
-            throw new NoSuchElementException("There is no such Operations!");
+            throw new NoSuchElementException("There is no such Departments!");
         }
 
         return createSimpleDtoList(inactivates);
@@ -44,7 +44,7 @@ public class DepartmentDetailsService {
         List<DepartmentDetails> deleted = departmentDetailsRepository.findAllByStatus(Status.DELETED);
 
         if (deleted.isEmpty()) {
-            throw new NoSuchElementException("There is no such Operations!");
+            throw new NoSuchElementException("There is no such Departments!");
         }
 
         return createSimpleDtoList(deleted);
@@ -54,7 +54,7 @@ public class DepartmentDetailsService {
         Optional<DepartmentDetails> operationDetails = departmentDetailsRepository.findById(id);
 
         if (operationDetails.isEmpty()) {
-            throw new NoSuchElementException("There is no such Operations!");
+            throw new NoSuchElementException(String.format("No find Department with %s id", id));
         }
 
         return mapToModifyDto(operationDetails.get());
@@ -70,7 +70,7 @@ public class DepartmentDetailsService {
     public String updateDepartmentDetails(DepartmentDetailsDto departmentDetailsDto, Long id) {
 
         if (departmentDetailsRepository.findById(id).isEmpty()) {
-            throw new NoSuchElementException(String.format("No find Operation with %s id", id));
+            throw new NoSuchElementException(String.format("No find Department with %s id", id));
         }
         else {
             DepartmentDetails departmentDetails = mapToEntity(departmentDetailsDto);
