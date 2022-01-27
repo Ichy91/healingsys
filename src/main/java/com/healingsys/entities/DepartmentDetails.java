@@ -15,7 +15,7 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OperationDetails {
+public class DepartmentDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -11,7 +11,7 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SimpleOperationDetailsDto {
+public class SimpleDepartmentDetailsDto {
     private Long id;
     private String name;
     private LocalTime open;

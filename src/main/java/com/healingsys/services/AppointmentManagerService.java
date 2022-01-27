@@ -1,6 +1,6 @@
 package com.healingsys.services;
 
-import com.healingsys.entities.OperationDetails;
+import com.healingsys.entities.DepartmentDetails;
 import com.healingsys.util.Day;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +17,11 @@ import java.util.List;
 public class AppointmentManagerService {
     private final AppointmentService appointmentService;
     private List<Day> days;
-    private OperationDetails details;
+    private DepartmentDetails details;
 
 
     public List<Day> appointmentHandler(LocalDateTime toDayDateTime) {
-        details = appointmentService.getOperationDetails().get();
+        details = appointmentService.getDepartmentDetails().get();
 
         if (days == null || days.isEmpty()) days = new ArrayList<>();
         else days.clear();

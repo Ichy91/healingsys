@@ -1,7 +1,7 @@
 package com.healingsys.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.healingsys.entities.OperationDetails;
+import com.healingsys.entities.DepartmentDetails;
 import com.healingsys.services.AppointmentService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,11 +21,11 @@ public class Day {
     private List<Slot> slots;
 
     @JsonIgnore
-    private OperationDetails details;
+    private DepartmentDetails details;
     @JsonIgnore
     private AppointmentService appointmentService;
 
-    public Day(LocalDate day, OperationDetails details, AppointmentService appointmentService) {
+    public Day(LocalDate day, DepartmentDetails details, AppointmentService appointmentService) {
         this.day = day;
         this.details = details;
         this.appointmentService = appointmentService;

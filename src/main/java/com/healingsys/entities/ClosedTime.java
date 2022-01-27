@@ -22,11 +22,11 @@ public class ClosedTime {
     @NotNull
     private LocalDate date;
 
-    private LocalTime closeFrom;
+    private LocalTime closedFrom;
 
-    private LocalTime closeTo;
+    private LocalTime closedTo;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "operation_details_id", referencedColumnName = "id")
-    private OperationDetails operationDetails;
+    @JoinColumn(name = "department_details_id", referencedColumnName = "id")
+    private DepartmentDetails departmentDetails;
 }

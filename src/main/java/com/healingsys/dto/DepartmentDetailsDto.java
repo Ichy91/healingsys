@@ -12,7 +12,7 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OperationDetailsDto {
+public class DepartmentDetailsDto {
     private String name;
     private LocalTime open;
     private LocalTime closed;
