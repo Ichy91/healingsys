@@ -32,10 +32,10 @@ public class DepartmentDetails {
     private String name;
 
     @NotNull
-    private LocalTime open;
+    private LocalTime opening;
 
     @NotNull
-    private LocalTime closed;
+    private LocalTime closing;
 
     @NotNull
     private int maxGeneratedDays;
