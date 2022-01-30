@@ -14,7 +14,7 @@ import java.util.Set;
 public class SimpleDepartmentDetailsDto {
     private Long id;
     private String name;
-    private LocalTime open;
-    private LocalTime closed;
+    private LocalTime opening;
+    private LocalTime closing;
     private Set<DayOfWeek> closedDay;
 }
