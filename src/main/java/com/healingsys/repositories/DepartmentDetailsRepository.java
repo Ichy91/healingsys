@@ -10,5 +10,7 @@ import java.util.List;
 @Repository
 public interface DepartmentDetailsRepository extends JpaRepository<DepartmentDetails, Long> {
 
-    public List<DepartmentDetails> findAllByStatus(Status status);
+    List<DepartmentDetails> findAllByStatus(Status status);
+
+    List<DepartmentDetails> findAll(DepartmentDetails departmentDetails);
 }
