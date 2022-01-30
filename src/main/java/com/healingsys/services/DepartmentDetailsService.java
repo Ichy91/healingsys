@@ -20,73 +20,67 @@ public class DepartmentDetailsService {
     private final DepartmentDetailsRepository departmentDetailsRepository;
     private final ModelMapper mapper;
 
-    public List<SimpleDepartmentDetailsDto> getAllActive() {
+    public List<SimpleDepartmentDetailsDto> getAllActive() throws NoSuchElementException {
         List<DepartmentDetails> actives = departmentDetailsRepository.findAllByStatus(Status.ACTIVE);
 
-        if (actives.isEmpty()) {
-            throw new NoSuchElementException("There is no such Departments!");
-        }
+        if (actives.isEmpty())
+            throw new NoSuchElementException(String.format("There is no such %s Departments!", Status.ACTIVE));
 
         return createSimpleDtoList(actives);
     }
 
-    public List<SimpleDepartmentDetailsDto> getAllInactive() {
+    public List<SimpleDepartmentDetailsDto> getAllInactive() throws NoSuchElementException {
         List<DepartmentDetails> inactivates = departmentDetailsRepository.findAllByStatus(Status.INACTIVE);
 
-        if (inactivates.isEmpty()) {
-            throw new NoSuchElementException("There is no such Departments!");
-        }
+        if (inactivates.isEmpty())
+            throw new NoSuchElementException(String.format("There is no such %s Departments!", Status.INACTIVE));
 
         return createSimpleDtoList(inactivates);
     }
 
-    public List<SimpleDepartmentDetailsDto> getAllDeleted() {
+    public List<SimpleDepartmentDetailsDto> getAllDeleted() throws NoSuchElementException {
         List<DepartmentDetails> deleted = departmentDetailsRepository.findAllByStatus(Status.DELETED);
 
-        if (deleted.isEmpty()) {
-            throw new NoSuchElementException("There is no such Departments!");
-        }
+        if (deleted.isEmpty())
+            throw new NoSuchElementException(String.format("There is no such %s Departments!", Status.DELETED));
 
         return createSimpleDtoList(deleted);
     }
 
-    public DepartmentDetailsDto getById(Long id) {
+    public DepartmentDetailsDto getById(Long id) throws NoSuchElementException {
         Optional<DepartmentDetails> operationDetails = departmentDetailsRepository.findById(id);
 
-        if (operationDetails.isEmpty()) {
+        if (operationDetails.isEmpty())
             throw new NoSuchElementException(String.format("No find Department with %s id", id));
-        }
 
         return mapToModifyDto(operationDetails.get());
     }
 
-    public String saveDepartmentDetails(DepartmentDetailsDto departmentDetailsDto) {
+    public String saveDepartmentDetails(DepartmentDetailsDto departmentDetailsDto) throws IllegalAccessException {
         DepartmentDetails departmentDetails = mapToEntity(departmentDetailsDto);
+
+        if (!departmentDetailsRepository.findAll(departmentDetails).isEmpty())
+            throw new IllegalAccessException("Department already exist!");
+
         departmentDetailsRepository.save(departmentDetails);
 
         return "Operation details saved!";
     }
 
-    public String updateDepartmentDetails(DepartmentDetailsDto departmentDetailsDto, Long id) {
-
-        if (departmentDetailsRepository.findById(id).isEmpty()) {
+    public String updateDepartmentDetails(DepartmentDetailsDto departmentDetailsDto, Long id) throws NoSuchElementException {
+        if (departmentDetailsRepository.findById(id).isEmpty())
             throw new NoSuchElementException(String.format("No find Department with %s id", id));
-        }
-        else {
-            DepartmentDetails departmentDetails = mapToEntity(departmentDetailsDto);
-            departmentDetails.setId(id);
-            departmentDetailsRepository.save(departmentDetails);
 
-            return "Operation details updated!";
-        }
+        DepartmentDetails departmentDetails = mapToEntity(departmentDetailsDto);
+        departmentDetails.setId(id);
+        departmentDetailsRepository.save(departmentDetails);
 
+        return "Operation details updated!";
     }
 
-    private List<SimpleDepartmentDetailsDto> createSimpleDtoList(List<DepartmentDetails> departmentDetailsList) {
-
-        if (departmentDetailsList.isEmpty()) {
+    private List<SimpleDepartmentDetailsDto> createSimpleDtoList(List<DepartmentDetails> departmentDetailsList) throws NoSuchElementException {
+        if (departmentDetailsList.isEmpty())
             throw new NoSuchElementException("The list is empty!");
-        }
 
         List<SimpleDepartmentDetailsDto> simpleDepartmentDetailsDtoList = new ArrayList<>();
 
