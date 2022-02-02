@@ -41,7 +41,7 @@ public class Day {
 
         int slotsNumberOfDay = calculateNumberOfSlots();
         long slotLengthInMinute = (long) (details.getSlotLengthInHour() * 60);
-        LocalTime time = details.getOpen();
+        LocalTime time = details.getOpening();
 
         for (int i = 0; i < slotsNumberOfDay; i++) {
             slots.add(generateSlot(time));
@@ -70,7 +70,7 @@ public class Day {
     }
 
     private int calculateNumberOfSlots() {
-        long openHours = ChronoUnit.HOURS.between(details.getOpen(), details.getClosed());
+        long openHours = ChronoUnit.HOURS.between(details.getOpening(), details.getClosing());
         return (int) Math.floor(openHours / details.getSlotLengthInHour());
     }
 
