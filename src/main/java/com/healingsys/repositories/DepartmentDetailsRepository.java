@@ -12,5 +12,5 @@ public interface DepartmentDetailsRepository extends JpaRepository<DepartmentDet
 
     List<DepartmentDetails> findAllByStatus(Status status);
 
-    List<DepartmentDetails> findAll(DepartmentDetails departmentDetails);
+    List<DepartmentDetails> findAllByName(String name);
 }

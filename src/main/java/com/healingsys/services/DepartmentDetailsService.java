@@ -57,11 +57,12 @@ public class DepartmentDetailsService {
     }
 
     public String saveDepartmentDetails(DepartmentDetailsDto departmentDetailsDto) throws IllegalAccessException {
-        DepartmentDetails departmentDetails = mapToEntity(departmentDetailsDto);
+        String departmentName = departmentDetailsDto.getName();
 
-        if (!departmentDetailsRepository.findAll(departmentDetails).isEmpty())
+        if (!departmentDetailsRepository.findAllByName(departmentName).isEmpty())
             throw new IllegalAccessException("Department already exist!");
 
+        DepartmentDetails departmentDetails = mapToEntity(departmentDetailsDto);
         departmentDetailsRepository.save(departmentDetails);
 
         return "Operation details saved!";
