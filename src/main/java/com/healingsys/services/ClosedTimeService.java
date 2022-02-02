@@ -3,16 +3,17 @@ package com.healingsys.services;
 import com.healingsys.dto.ClosedAppointmentDto;
 import com.healingsys.dto.SimpleDepartmentDetailsDto;
 import com.healingsys.entities.ClosedTime;
+import com.healingsys.exception.ApiRequestException;
 import com.healingsys.repositories.ClosedTimeRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -21,44 +22,50 @@ public class ClosedTimeService {
     private final ClosedTimeRepository closedTimeRepository;
     private final ModelMapper mapper;
 
-    public ClosedAppointmentDto getById(Long id) throws NoSuchElementException {
+    public ClosedAppointmentDto getById(Long id) throws ApiRequestException {
         Optional<ClosedTime> closedTime = closedTimeRepository.findById(id);
 
         if (closedTime.isEmpty())
-            throw new NoSuchElementException(String.format("No find closed appointment with %s id", id));
+            throw new ApiRequestException(
+                    String.format("No find closed appointment with %s id", id),
+                    HttpStatus.NOT_FOUND);
 
         return mapToDto(closedTime.get());
     }
 
-    public List<ClosedAppointmentDto> getClosedAppointmentByDepartment(Long departmentId) throws NoSuchElementException {
+    public List<ClosedAppointmentDto> getClosedAppointmentByDepartment(Long departmentId) throws ApiRequestException {
         List<ClosedTime> closedTimeList = closedTimeRepository.findAllByDepartmentDetailsId(departmentId);
 
         if (closedTimeList.isEmpty())
-            throw new NoSuchElementException("No find closed Appointments!");
+            throw new ApiRequestException("No find closed Appointments!", HttpStatus.NOT_FOUND);
 
         return createClosedAppointmentDtoList(closedTimeList);
     }
 
-    public List<ClosedAppointmentDto> getClosedAppointmentsByDepartmentFromDay(Long departmentId, LocalDate day) throws NoSuchElementException {
+    public List<ClosedAppointmentDto> getClosedAppointmentsByDepartmentFromDay(Long departmentId, LocalDate day) throws ApiRequestException {
         List<ClosedTime> closedTimeList =
                 closedTimeRepository.findAllByDepartmentDetailsIdAndDateGreaterThanEqualOrderByDate(departmentId, day);
 
         if (closedTimeList.isEmpty())
-            throw new NoSuchElementException("No find closed Appointments!");
+            throw new ApiRequestException("No find closed Appointments!", HttpStatus.NOT_FOUND);
 
         return createClosedAppointmentDtoList(closedTimeList);
     }
 
-    public String updateClosedAppointment(ClosedAppointmentDto closedAppointmentDto) throws IllegalAccessException, NoSuchElementException {
+    public String updateClosedAppointment(ClosedAppointmentDto closedAppointmentDto) throws ApiRequestException {
         Long id = closedAppointmentDto.getId();
         LocalDate appointmentDate = closedAppointmentDto.getDate();
         LocalDate toDay = LocalDate.now();
 
         if (closedTimeRepository.findById(id).isEmpty())
-            throw new NoSuchElementException(String.format("Closed appointment not found with id: %s", id));
+            throw new ApiRequestException(
+                    String.format("Closed appointment not found with id: %s", id),
+                    HttpStatus.NOT_FOUND);
 
         else if (appointmentDate.compareTo(toDay) <= 0)
-            throw new IllegalAccessException(String.format("Updating is not allowed before the current (%s) date", toDay));
+            throw new ApiRequestException(
+                    String.format("Updating is not allowed before the current (%s) date", toDay),
+                    HttpStatus.UNAUTHORIZED);
 
         ClosedTime closedTime = closedTimeRepository.findById(id).get();
 
@@ -70,7 +77,7 @@ public class ClosedTimeService {
     }
 
     public String saveClosedAppointment(ClosedAppointmentDto closedAppointmentDto,
-                                        SimpleDepartmentDetailsDto simpleDepartmentDetailsDto) throws IllegalAccessException, IllegalArgumentException {
+                                        SimpleDepartmentDetailsDto simpleDepartmentDetailsDto) throws ApiRequestException {
         checkToSave(closedAppointmentDto, simpleDepartmentDetailsDto);
 
         closedTimeRepository.save(mapToEntity(closedAppointmentDto));
@@ -81,16 +88,20 @@ public class ClosedTimeService {
                 closedAppointmentDto.getClosedTo());
     }
 
-    public String deleteClosedAppointment(ClosedAppointmentDto closedAppointmentDto) throws IllegalAccessException, NoSuchElementException {
+    public String deleteClosedAppointment(ClosedAppointmentDto closedAppointmentDto) throws ApiRequestException {
         Long id = closedAppointmentDto.getId();
         LocalDate appointmentDate = closedAppointmentDto.getDate();
         LocalDate toDay = LocalDate.now();
 
         if (closedTimeRepository.findById(id).isEmpty())
-            throw new NoSuchElementException(String.format("Closed appointment not found with id: %s", id));
+            throw new ApiRequestException(
+                    String.format("Closed appointment not found with id: %s", id),
+                    HttpStatus.NOT_FOUND);
 
         else if (appointmentDate.compareTo(toDay) <= 0)
-            throw new IllegalAccessException(String.format("Deletion is not allowed before the current (%s) date", toDay));
+            throw new ApiRequestException(
+                    String.format("Deletion is not allowed before the current (%s) date", toDay),
+                    HttpStatus.UNAUTHORIZED);
 
         closedTimeRepository.deleteById(id);
 
@@ -102,7 +113,7 @@ public class ClosedTimeService {
     }
 
     private void checkToSave(ClosedAppointmentDto closedAppointmentDto,
-                             SimpleDepartmentDetailsDto simpleDepartmentDetailsDto) throws IllegalAccessException, IllegalArgumentException {
+                             SimpleDepartmentDetailsDto simpleDepartmentDetailsDto) throws ApiRequestException {
         LocalDate appointmentDate = closedAppointmentDto.getDate();
         LocalDate toDay = LocalDate.now();
         LocalTime closedFrom = closedAppointmentDto.getClosedForm();
@@ -113,10 +124,14 @@ public class ClosedTimeService {
         List<ClosedTime> byDateAndClosedFromTo = closedTimeRepository.findAllByDepartmentDetailsIdAndDateAndClosedFromAndClosedTo(departmentId, appointmentDate, closedFrom, closedTo);
 
         if (appointmentDate.compareTo(toDay) <= 0)
-            throw new IllegalAccessException(String.format("Saving is not allowed before the current (%s) date", toDay));
+            throw new ApiRequestException(
+                    String.format("Saving is not allowed before the current (%s) date", toDay),
+                    HttpStatus.UNAUTHORIZED);
 
         else if (!byDateAndClosedFromTo.isEmpty())
-            throw new IllegalArgumentException("Closed appointment already exists!");
+            throw new ApiRequestException(
+                    "Closed appointment already exists!",
+                    HttpStatus.BAD_REQUEST);
 
         openingClosingExceptions(closedAppointmentDto, simpleDepartmentDetailsDto);
 
@@ -129,23 +144,26 @@ public class ClosedTimeService {
     }
 
     private void openingClosingExceptions(ClosedAppointmentDto closedAppointmentDto,
-                                          SimpleDepartmentDetailsDto simpleDepartmentDetailsDto) throws IllegalArgumentException {
+                                          SimpleDepartmentDetailsDto simpleDepartmentDetailsDto) throws ApiRequestException {
         LocalTime closedFrom = closedAppointmentDto.getClosedForm();
         LocalTime closedTo = closedAppointmentDto.getClosedTo();
         LocalTime departmentOpening = simpleDepartmentDetailsDto.getOpening();
         LocalTime departmentClosing = simpleDepartmentDetailsDto.getClosing();
 
         if (closedFrom.compareTo(departmentOpening) < 0)
-            throw new IllegalArgumentException(String.format(
-                    "The 'closed-from' time (%s) lower, than the Department opening (%s) time!", closedFrom, departmentOpening));
+            throw new ApiRequestException(
+                    String.format("The 'closed-from' time (%s) lower, than the Department opening (%s) time!", closedFrom, departmentOpening),
+                    HttpStatus.BAD_REQUEST);
+
         else if (closedTo.compareTo(departmentClosing) > 0)
-            throw new IllegalArgumentException(String.format(
-                    "The 'closed-to' time (%s) higher, than the Department closing (%s) time!", closedTo, departmentClosing));
+            throw new ApiRequestException(
+                    String.format("The 'closed-to' time (%s) higher, than the Department closing (%s) time!", closedTo, departmentClosing),
+                    HttpStatus.BAD_REQUEST);
     }
 
     private void nullValuesExceptions(ClosedTime closedTime,
                                       ClosedAppointmentDto closedAppointmentDto,
-                                      SimpleDepartmentDetailsDto simpleDepartmentDetailsDto) throws IllegalArgumentException {
+                                      SimpleDepartmentDetailsDto simpleDepartmentDetailsDto) throws ApiRequestException {
         LocalTime savedClosedFrom = closedTime.getClosedFrom();
         LocalTime savedClosedTo = closedTime.getClosedTo();
         LocalTime closedFrom = closedAppointmentDto.getClosedForm();
@@ -154,46 +172,53 @@ public class ClosedTimeService {
         LocalTime departmentClosing = simpleDepartmentDetailsDto.getClosing();
 
         if (savedClosedFrom == null && savedClosedTo == null)
-            throw new IllegalArgumentException("Today is all day closing. Check the saved closing appointment!");
+            throw new ApiRequestException(
+                    "Today is all day closing. Check the saved closing appointment!",
+                    HttpStatus.BAD_REQUEST);
 
         else if (savedClosedFrom == null && closedFrom.compareTo(savedClosedTo) < 0)
-            throw new IllegalArgumentException(
-                    String.format("Today form %s until %s is closing. Check the saved closing appointment!", departmentOpening, savedClosedTo));
+            throw new ApiRequestException(
+                    String.format("Today form %s until %s is closing. Check the saved closing appointment!", departmentOpening, savedClosedTo),
+                    HttpStatus.BAD_REQUEST);
 
         else {
             assert savedClosedFrom != null;
             if (closedTo.compareTo(savedClosedFrom) > 0 && savedClosedTo == null)
-                throw new IllegalArgumentException(
-                        String.format("Today form %s until %s is closing. Check the saved closing appointment!",savedClosedFrom, departmentClosing));
+                throw new ApiRequestException(
+                        String.format("Today form %s until %s is closing. Check the saved closing appointment!",savedClosedFrom, departmentClosing),
+                        HttpStatus.BAD_REQUEST);
         }
 
     }
 
     private void allReadyExistExceptions(ClosedTime closedTime,
-                                         ClosedAppointmentDto closedAppointmentDto) throws IllegalArgumentException{
+                                         ClosedAppointmentDto closedAppointmentDto) throws ApiRequestException{
         LocalTime savedClosedFrom = closedTime.getClosedFrom();
         LocalTime savedClosedTo = closedTime.getClosedTo();
         LocalTime closedFrom = closedAppointmentDto.getClosedForm();
         LocalTime closedTo = closedAppointmentDto.getClosedTo();
 
         if (closedFrom.compareTo(savedClosedFrom) > 0 && closedFrom.compareTo(savedClosedTo) < 0)
-            throw new IllegalArgumentException(
-                    String.format("The new 'closed-from' time is already exist in one closing appointment (%s - %s)!", savedClosedFrom, savedClosedTo));
+            throw new ApiRequestException(
+                    String.format("The new 'closed-from' time is already exist in one closing appointment (%s - %s)!", savedClosedFrom, savedClosedTo),
+                    HttpStatus.BAD_REQUEST);
 
         else if (closedTo.compareTo(savedClosedFrom) > 0 && closedTo.compareTo(savedClosedTo) < 0)
-            throw new IllegalArgumentException(
-                    String.format("The new 'closed-to' time is already exist in one closing appointment (%s - %s)!", savedClosedFrom, savedClosedTo));
+            throw new ApiRequestException(
+                    String.format("The new 'closed-to' time is already exist in one closing appointment (%s - %s)!", savedClosedFrom, savedClosedTo),
+                    HttpStatus.BAD_REQUEST);
 
         else if (closedFrom.compareTo(savedClosedFrom) < 0 && closedTo.compareTo(savedClosedTo) > 0)
-            throw new IllegalArgumentException(
-                    String.format("Between the 'closed-from' and 'closed-to' already exists a closing appointment (%s - %s)!", savedClosedFrom, savedClosedTo));
+            throw new ApiRequestException(
+                    String.format("Between the 'closed-from' and 'closed-to' already exists a closing appointment (%s - %s)!", savedClosedFrom, savedClosedTo),
+                    HttpStatus.BAD_REQUEST);
 
 
     }
 
-    private List<ClosedAppointmentDto> createClosedAppointmentDtoList(List<ClosedTime> closedTimeList) throws NoSuchElementException {
+    private List<ClosedAppointmentDto> createClosedAppointmentDtoList(List<ClosedTime> closedTimeList) throws ApiRequestException {
         if (closedTimeList.isEmpty())
-            throw new NoSuchElementException("The list is empty!");
+            throw new ApiRequestException("The list is empty!", HttpStatus.NOT_FOUND);
 
         List<ClosedAppointmentDto> closedAppointmentDtoList = new ArrayList<>();
 
