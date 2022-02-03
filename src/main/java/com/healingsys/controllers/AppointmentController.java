@@ -1,14 +1,13 @@
 package com.healingsys.controllers;
 
+import com.healingsys.exception.ApiIllegalArgumentException;
+import com.healingsys.exception.ApiNoSuchElementException;
 import com.healingsys.services.AppointmentManagerService;
 import com.healingsys.services.AppointmentService;
 import com.healingsys.util.Day;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -18,8 +17,10 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
     private final AppointmentManagerService appointmentManagerService;
 
-    @GetMapping("/appointments")
-    public List<Day> getDays() {
-        return appointmentManagerService.appointmentHandler(LocalDateTime.now());
+    @GetMapping("/appointments/{departmentId}")
+    public List<Day> getDepartmentDays(@PathVariable Long departmentId)
+            throws ApiNoSuchElementException, ApiIllegalArgumentException {
+
+        return appointmentManagerService.appointmentHandler(departmentId);
     }
 }
