@@ -5,6 +5,8 @@ import com.healingsys.dto.SimpleDepartmentDetailsDto;
 import com.healingsys.entities.DepartmentDetails;
 import com.healingsys.entities.enums.Status;
 import com.healingsys.exception.ApiAlreadyExistException;
+import com.healingsys.exception.ApiIllegalArgumentException;
+import com.healingsys.exception.ApiNoContentException;
 import com.healingsys.exception.ApiNoSuchElementException;
 import com.healingsys.repositories.DepartmentDetailsRepository;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +69,8 @@ public class DepartmentDetailsService {
 
 
     public String saveDepartmentDetails(DepartmentDetailsDto departmentDetailsDto)
-            throws ApiAlreadyExistException {
+            throws ApiAlreadyExistException, ApiIllegalArgumentException, ApiNoContentException {
+        checkValues(departmentDetailsDto);
         String departmentName = departmentDetailsDto.getName();
 
         if (!departmentDetailsRepository.findAllByName(departmentName).isEmpty())
@@ -81,15 +84,44 @@ public class DepartmentDetailsService {
 
 
     public String updateDepartmentDetails(DepartmentDetailsDto departmentDetailsDto, Long id)
-            throws ApiNoSuchElementException {
-        if (departmentDetailsRepository.findById(id).isEmpty())
+            throws ApiNoSuchElementException, ApiIllegalArgumentException, ApiNoContentException {
+        if (departmentDetailsRepository.findById(id).isEmpty()) {
             throw new ApiNoSuchElementException(String.format("No find Department with %s id", id));
+        }
+        checkValues(departmentDetailsDto);
 
         DepartmentDetails departmentDetails = mapToEntity(departmentDetailsDto);
         departmentDetails.setId(id);
         departmentDetailsRepository.save(departmentDetails);
 
         return "Operation details updated!";
+    }
+
+
+    private void checkValues(DepartmentDetailsDto departmentDetailsDto)
+            throws ApiIllegalArgumentException, ApiNoContentException {
+        String departmentName = departmentDetailsDto.getName();
+        int maxGeneratedDays = departmentDetailsDto.getMaxGeneratedDays();
+        int slotMaxCapacity = departmentDetailsDto.getSlotMaxCapacity();
+        double slotLengthInHour = departmentDetailsDto.getSlotLengthInHour();
+
+        if (departmentName == null || departmentName.equals(""))
+            throw new ApiNoContentException("Give a name for the Department!");
+
+        if (maxGeneratedDays < 1)
+            throw new ApiIllegalArgumentException("The number of days generated cannot be less than 1!");
+
+        if (maxGeneratedDays > 30)
+            throw new ApiIllegalArgumentException("The number of days generated cannot be more than 30!");
+
+        if (slotMaxCapacity < 1)
+            throw new ApiIllegalArgumentException("The slot capacity cannot be less than 1!");
+
+        if (slotLengthInHour < 0.5)
+            throw new ApiIllegalArgumentException("The length of the slot should not be less than 0.5 hours, if the duration of the slot per person is less than 0.5 hours, increase its capacity!");
+
+        if (slotLengthInHour > 5.0)
+            throw new ApiIllegalArgumentException("The duration of the slot cannot be more than 5.0 hours!");
     }
 
 
