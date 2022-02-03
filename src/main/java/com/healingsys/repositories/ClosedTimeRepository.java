@@ -17,5 +17,5 @@ public interface ClosedTimeRepository extends JpaRepository<ClosedTime, Long> {
 
     List<ClosedTime> findAllByDepartmentDetailsIdAndDateAndClosedFromAndClosedTo(Long departmentId, LocalDate date, LocalTime closedFrom, LocalTime closedTo);
 
-    List<ClosedTime> findAllByDepartmentDetailsIdAndDate(Long departmentId, LocalDate date);
+    List<ClosedTime> findAllByDepartmentDetailsIdAndDateOrderByClosedFrom(Long departmentId, LocalDate date);
 }
