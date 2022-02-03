@@ -14,8 +14,8 @@ import java.util.Set;
 @NoArgsConstructor
 public class DepartmentDetailsDto {
     private String name;
-    private LocalTime open;
-    private LocalTime closed;
+    private LocalTime opening;
+    private LocalTime closing;
     private int maxGeneratedDays;
     private double slotLengthInHour;
     private int slotMaxCapacity;
