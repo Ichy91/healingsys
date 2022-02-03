@@ -59,12 +59,12 @@ public class DepartmentDetailsService {
 
     public DepartmentDetailsDto getById(Long id)
             throws ApiNoSuchElementException {
-        Optional<DepartmentDetails> operationDetails = departmentDetailsRepository.findById(id);
+        Optional<DepartmentDetails> departmentDetails = departmentDetailsRepository.findById(id);
 
-        if (operationDetails.isEmpty())
+        if (departmentDetails.isEmpty())
             throw new ApiNoSuchElementException(String.format("No find Department with %s id", id));
 
-        return mapToModifyDto(operationDetails.get());
+        return mapToModifyDto(departmentDetails.get());
     }
 
 
