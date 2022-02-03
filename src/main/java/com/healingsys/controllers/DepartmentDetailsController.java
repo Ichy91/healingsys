@@ -3,6 +3,8 @@ package com.healingsys.controllers;
 import com.healingsys.dto.DepartmentDetailsDto;
 import com.healingsys.dto.SimpleDepartmentDetailsDto;
 import com.healingsys.exception.ApiAlreadyExistException;
+import com.healingsys.exception.ApiIllegalArgumentException;
+import com.healingsys.exception.ApiNoContentException;
 import com.healingsys.exception.ApiNoSuchElementException;
 import com.healingsys.services.DepartmentDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +53,7 @@ public class DepartmentDetailsController {
 
     @PostMapping("/add")
     public String addDepartmentDetails(@RequestBody DepartmentDetailsDto departmentDetailsDto)
-            throws ApiAlreadyExistException {
+            throws ApiAlreadyExistException, ApiIllegalArgumentException, ApiNoContentException {
 
         return departmentDetailsService.saveDepartmentDetails(departmentDetailsDto);
     }
@@ -61,7 +63,7 @@ public class DepartmentDetailsController {
     public String updateDepartmentDetails(
             @PathVariable Long id,
             @RequestBody DepartmentDetailsDto departmentDetailsDto)
-            throws ApiNoSuchElementException {
+            throws ApiAlreadyExistException, ApiIllegalArgumentException, ApiNoContentException {
 
         return departmentDetailsService.updateDepartmentDetails(departmentDetailsDto, id);
     }
