@@ -61,4 +61,17 @@ public class ApiExceptionHandler {
 
         return new ResponseEntity<>(apiException, illegalAccess);
     }
+
+    @ExceptionHandler(value = {ApiNoContentException.class})
+    public ResponseEntity<Object> handleApiNoContentException(ApiNoContentException e) {
+        HttpStatus noContent = HttpStatus.NO_CONTENT;
+
+        ApiException apiException = new ApiException(
+                e.getMessage(),
+                noContent,
+                ZonedDateTime.now()
+        );
+
+        return new ResponseEntity<>(apiException, noContent);
+    }
 }
