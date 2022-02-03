@@ -125,11 +125,7 @@ public class DepartmentDetailsService {
     }
 
 
-    private List<SimpleDepartmentDetailsDto> createSimpleDtoList(List<DepartmentDetails> departmentDetailsList)
-            throws ApiNoSuchElementException {
-        if (departmentDetailsList.isEmpty())
-            throw new ApiNoSuchElementException("The list is empty!");
-
+    private List<SimpleDepartmentDetailsDto> createSimpleDtoList(List<DepartmentDetails> departmentDetailsList) {
         List<SimpleDepartmentDetailsDto> simpleDepartmentDetailsDtoList = new ArrayList<>();
 
         for (var operationDetails: departmentDetailsList) {
@@ -139,16 +135,13 @@ public class DepartmentDetailsService {
         return simpleDepartmentDetailsDtoList;
     }
 
-
     private SimpleDepartmentDetailsDto mapToSimpleDto(DepartmentDetails departmentDetails) {
         return mapper.map(departmentDetails, SimpleDepartmentDetailsDto.class);
     }
 
-
     private DepartmentDetailsDto mapToModifyDto(DepartmentDetails departmentDetails) {
         return mapper.map(departmentDetails, DepartmentDetailsDto.class);
     }
-
 
     private DepartmentDetails mapToEntity(DepartmentDetailsDto departmentDetailsDto) {
         return mapper.map(departmentDetailsDto, DepartmentDetails.class);
