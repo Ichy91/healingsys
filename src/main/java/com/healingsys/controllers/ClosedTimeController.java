@@ -2,10 +2,7 @@ package com.healingsys.controllers;
 
 import com.healingsys.dto.ClosedAppointmentDto;
 import com.healingsys.dto.SimpleDepartmentDetailsDto;
-import com.healingsys.exception.ApiAlreadyExistException;
-import com.healingsys.exception.ApiIllegalAccessException;
-import com.healingsys.exception.ApiIllegalArgumentException;
-import com.healingsys.exception.ApiNoSuchElementException;
+import com.healingsys.exception.*;
 import com.healingsys.services.ClosedTimeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +45,7 @@ public class ClosedTimeController {
     @PostMapping("/save")
     public String addClosedAppointment(@RequestBody ClosedAppointmentDto closedAppointmentDto,
                                        @RequestBody SimpleDepartmentDetailsDto simpleDepartmentDetailsDto)
-            throws ApiIllegalAccessException, ApiAlreadyExistException, ApiIllegalArgumentException {
+            throws ApiNoSuchElementException, ApiIllegalAccessException, ApiAlreadyExistException, ApiIllegalArgumentException {
 
         return closedTimeService.saveClosedAppointment(closedAppointmentDto, simpleDepartmentDetailsDto);
     }
@@ -56,7 +53,7 @@ public class ClosedTimeController {
 
     @PutMapping("/update")
     public String updateClosedAppointment(@RequestBody ClosedAppointmentDto closedAppointmentDto)
-            throws ApiNoSuchElementException, ApiIllegalAccessException {
+            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalAccessException {
 
         return closedTimeService.updateClosedAppointment(closedAppointmentDto);
     }

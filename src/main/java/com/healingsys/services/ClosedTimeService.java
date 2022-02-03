@@ -3,10 +3,7 @@ package com.healingsys.services;
 import com.healingsys.dto.ClosedAppointmentDto;
 import com.healingsys.dto.SimpleDepartmentDetailsDto;
 import com.healingsys.entities.ClosedTime;
-import com.healingsys.exception.ApiAlreadyExistException;
-import com.healingsys.exception.ApiIllegalAccessException;
-import com.healingsys.exception.ApiIllegalArgumentException;
-import com.healingsys.exception.ApiNoSuchElementException;
+import com.healingsys.exception.*;
 import com.healingsys.repositories.ClosedTimeRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -59,13 +56,16 @@ public class ClosedTimeService {
 
 
     public String updateClosedAppointment(ClosedAppointmentDto closedAppointmentDto)
-            throws ApiNoSuchElementException, ApiIllegalAccessException {
+            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalAccessException {
         Long id = closedAppointmentDto.getId();
         LocalDate appointmentDate = closedAppointmentDto.getDate();
         LocalDate toDay = LocalDate.now();
 
         if (closedTimeRepository.findById(id).isEmpty())
             throw new ApiNoSuchElementException(String.format("Closed appointment not found with id: %s", id));
+
+        else if (appointmentDate == null)
+            throw new ApiNoContentException("Missing date!");
 
         else if (appointmentDate.compareTo(toDay) <= 0)
             throw new ApiIllegalAccessException(String.format("Updating is not allowed before the current (%s) date", toDay));
@@ -82,7 +82,7 @@ public class ClosedTimeService {
 
     public String saveClosedAppointment(ClosedAppointmentDto closedAppointmentDto,
                                         SimpleDepartmentDetailsDto simpleDepartmentDetailsDto)
-            throws ApiIllegalAccessException, ApiAlreadyExistException, ApiIllegalArgumentException {
+            throws ApiNoSuchElementException, ApiIllegalAccessException, ApiAlreadyExistException, ApiIllegalArgumentException {
         checkToSave(closedAppointmentDto, simpleDepartmentDetailsDto);
 
         closedTimeRepository.save(mapToEntity(closedAppointmentDto));
@@ -118,7 +118,7 @@ public class ClosedTimeService {
 
     private void checkToSave(ClosedAppointmentDto closedAppointmentDto,
                              SimpleDepartmentDetailsDto simpleDepartmentDetailsDto)
-            throws ApiIllegalAccessException, ApiAlreadyExistException, ApiIllegalArgumentException {
+            throws ApiNoSuchElementException, ApiIllegalAccessException, ApiAlreadyExistException, ApiIllegalArgumentException {
         LocalDate appointmentDate = closedAppointmentDto.getDate();
         LocalDate toDay = LocalDate.now();
         LocalTime closedFrom = closedAppointmentDto.getClosedForm();
@@ -128,7 +128,10 @@ public class ClosedTimeService {
         List<ClosedTime> byDate = closedTimeRepository.findAllByDepartmentDetailsIdAndDate(departmentId, appointmentDate);
         List<ClosedTime> byDateAndClosedFromTo = closedTimeRepository.findAllByDepartmentDetailsIdAndDateAndClosedFromAndClosedTo(departmentId, appointmentDate, closedFrom, closedTo);
 
-        if (appointmentDate.compareTo(toDay) <= 0)
+        if (appointmentDate == null)
+            throw new ApiNoSuchElementException("Missing date!");
+
+        else if (appointmentDate.compareTo(toDay) <= 0)
             throw new ApiIllegalAccessException(String.format("Saving is not allowed before the current (%s) date", toDay));
 
         else if (!byDateAndClosedFromTo.isEmpty())
