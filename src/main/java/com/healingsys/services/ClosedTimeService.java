@@ -94,6 +94,17 @@ public class ClosedTimeService {
     }
 
 
+    public List<ClosedAppointmentDto> getAllClosedAppointmentByDepartmentAndDay(Long departmentId, LocalDate day) {
+        List<ClosedTime> closedTimes =
+                closedTimeRepository.findAllByDepartmentDetailsIdAndDateOrderByClosedFrom(departmentId, day);
+
+        if (closedTimes.isEmpty())
+            return null;
+
+        return createClosedAppointmentDtoList(closedTimes);
+    }
+
+
     public String deleteClosedAppointment(ClosedAppointmentDto closedAppointmentDto)
             throws ApiNoSuchElementException, ApiIllegalAccessException {
         Long id = closedAppointmentDto.getId();
@@ -125,7 +136,7 @@ public class ClosedTimeService {
         LocalTime closedTo = closedAppointmentDto.getClosedTo();
         Long departmentId = simpleDepartmentDetailsDto.getId();
 
-        List<ClosedTime> byDate = closedTimeRepository.findAllByDepartmentDetailsIdAndDate(departmentId, appointmentDate);
+        List<ClosedTime> byDate = closedTimeRepository.findAllByDepartmentDetailsIdAndDateOrderByClosedFrom(departmentId, appointmentDate);
         List<ClosedTime> byDateAndClosedFromTo = closedTimeRepository.findAllByDepartmentDetailsIdAndDateAndClosedFromAndClosedTo(departmentId, appointmentDate, closedFrom, closedTo);
 
         if (appointmentDate == null)
@@ -218,11 +229,7 @@ public class ClosedTimeService {
     }
 
 
-    private List<ClosedAppointmentDto> createClosedAppointmentDtoList(List<ClosedTime> closedTimeList)
-            throws ApiNoSuchElementException {
-        if (closedTimeList.isEmpty())
-            throw new ApiNoSuchElementException("The list is empty!");
-
+    private List<ClosedAppointmentDto> createClosedAppointmentDtoList(List<ClosedTime> closedTimeList) {
         List<ClosedAppointmentDto> closedAppointmentDtoList = new ArrayList<>();
 
         for (var closedTime: closedTimeList) {
@@ -232,11 +239,9 @@ public class ClosedTimeService {
         return closedAppointmentDtoList;
     }
 
-
     private ClosedTime mapToEntity(ClosedAppointmentDto closedAppointmentDto) {
         return mapper.map(closedAppointmentDto, ClosedTime.class);
     }
-
 
     private ClosedAppointmentDto mapToDto(ClosedTime closedTime) {
         return mapper.map(closedTime, ClosedAppointmentDto.class);
