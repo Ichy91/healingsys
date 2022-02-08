@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -55,26 +56,37 @@ public class ClosedTimeService {
     }
 
 
+    public List<ClosedAppointmentDto> getAllClosedAppointmentByDepartmentAndDay(Long departmentId, LocalDate day) {
+        List<ClosedTime> closedTimes =
+                closedTimeRepository.findAllByDepartmentDetailsIdAndDateOrderByClosedFrom(departmentId, day);
+
+        if (closedTimes.isEmpty())
+            return null;
+
+        return createClosedAppointmentDtoList(closedTimes);
+    }
+
+
     public String updateClosedAppointment(ClosedAppointmentDto closedAppointmentDto)
-            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalAccessException {
+            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalAccessException, ApiIllegalArgumentException {
         Long id = closedAppointmentDto.getId();
-        LocalDate appointmentDate = closedAppointmentDto.getDate();
-        LocalDate toDay = LocalDate.now();
 
         if (closedTimeRepository.findById(id).isEmpty())
             throw new ApiNoSuchElementException(String.format("Closed appointment not found with id: %s", id));
 
-        else if (appointmentDate == null)
-            throw new ApiNoContentException("Missing date!");
-
-        else if (appointmentDate.compareTo(toDay) <= 0)
-            throw new ApiIllegalAccessException(String.format("Updating is not allowed before the current (%s) date", toDay));
+        checkClosedAppointmentValues(closedAppointmentDto);
 
         ClosedTime closedTime = closedTimeRepository.findById(id).get();
+        LocalDate closedTimeDate = closedTime.getDate();
+        LocalDate appointmentDate = closedAppointmentDto.getDate();
 
-        closedTime.setDate(closedAppointmentDto.getDate());
-        closedTime.setClosedFrom(closedAppointmentDto.getClosedForm());
+        if (closedTimeDate.compareTo(appointmentDate) != 0)
+            throw new ApiIllegalAccessException("Changing the date is not allowed!");
+
+        closedTime.setClosedFrom(closedAppointmentDto.getClosedFrom());
         closedTime.setClosedTo(closedAppointmentDto.getClosedTo());
+
+        closedTimeRepository.save(closedTime);
 
         return "Closed appointment updated!";
     }
@@ -89,19 +101,8 @@ public class ClosedTimeService {
 
         return String.format("Closed appointment saved! | %s %s-%s",
                 closedAppointmentDto.getDate(),
-                closedAppointmentDto.getClosedForm(),
+                closedAppointmentDto.getClosedFrom(),
                 closedAppointmentDto.getClosedTo());
-    }
-
-
-    public List<ClosedAppointmentDto> getAllClosedAppointmentByDepartmentAndDay(Long departmentId, LocalDate day) {
-        List<ClosedTime> closedTimes =
-                closedTimeRepository.findAllByDepartmentDetailsIdAndDateOrderByClosedFrom(departmentId, day);
-
-        if (closedTimes.isEmpty())
-            return null;
-
-        return createClosedAppointmentDtoList(closedTimes);
     }
 
 
@@ -122,7 +123,7 @@ public class ClosedTimeService {
         return String.format("Closed appointment deleted! | id: %s, date: %s %s-%s",
                 closedAppointmentDto.getId(),
                 closedAppointmentDto.getDate(),
-                closedAppointmentDto.getClosedForm(),
+                closedAppointmentDto.getClosedFrom(),
                 closedAppointmentDto.getClosedTo());
     }
 
@@ -131,21 +132,16 @@ public class ClosedTimeService {
                              SimpleDepartmentDetailsDto simpleDepartmentDetailsDto)
             throws ApiNoSuchElementException, ApiIllegalAccessException, ApiAlreadyExistException, ApiIllegalArgumentException {
         LocalDate appointmentDate = closedAppointmentDto.getDate();
-        LocalDate toDay = LocalDate.now();
-        LocalTime closedFrom = closedAppointmentDto.getClosedForm();
+        LocalTime closedFrom = closedAppointmentDto.getClosedFrom();
         LocalTime closedTo = closedAppointmentDto.getClosedTo();
         Long departmentId = simpleDepartmentDetailsDto.getId();
 
         List<ClosedTime> byDate = closedTimeRepository.findAllByDepartmentDetailsIdAndDateOrderByClosedFrom(departmentId, appointmentDate);
         List<ClosedTime> byDateAndClosedFromTo = closedTimeRepository.findAllByDepartmentDetailsIdAndDateAndClosedFromAndClosedTo(departmentId, appointmentDate, closedFrom, closedTo);
 
-        if (appointmentDate == null)
-            throw new ApiNoSuchElementException("Missing date!");
+        checkClosedAppointmentValues(closedAppointmentDto);
 
-        else if (appointmentDate.compareTo(toDay) <= 0)
-            throw new ApiIllegalAccessException(String.format("Saving is not allowed before the current (%s) date", toDay));
-
-        else if (!byDateAndClosedFromTo.isEmpty())
+        if (!byDateAndClosedFromTo.isEmpty())
             throw new ApiAlreadyExistException("Closed appointment already exists!");
 
         openingClosingExceptions(closedAppointmentDto, simpleDepartmentDetailsDto);
@@ -159,10 +155,44 @@ public class ClosedTimeService {
     }
 
 
+    private void checkClosedAppointmentValues(ClosedAppointmentDto closedAppointmentDto)
+            throws ApiNoContentException, ApiIllegalAccessException, ApiIllegalArgumentException {
+        LocalDate toDay = LocalDate.now();
+        LocalDate appointmentDate = closedAppointmentDto.getDate();
+
+        LocalTime closedFrom = closedAppointmentDto.getClosedFrom();
+        LocalTime closedTo = closedAppointmentDto.getClosedTo();
+        LocalTime standard = LocalTime.of(0,0);
+        Duration durationOfClosedFrom = null;
+        Duration durationOfClosedTo = null;
+
+        if (closedFrom != null)
+            durationOfClosedFrom = Duration.between(closedFrom, standard);
+
+        else if (closedTo != null)
+            durationOfClosedTo = Duration.between(closedTo, standard);
+
+        if (appointmentDate == null)
+            throw new ApiNoContentException("Missing date!");
+
+        else if (appointmentDate.compareTo(toDay) <= 0)
+            throw new ApiIllegalAccessException(String.format("The Operation is not allowed before the current (%s) date", toDay));
+
+        if (closedFrom != null && closedTo != null && closedFrom.compareTo(closedTo) >= 0)
+            throw new ApiIllegalArgumentException("The closing from time must be less than the closing to time!");
+
+        if (durationOfClosedFrom != null && ((double) durationOfClosedFrom.toMinutes() / 30) % 1 != 0)
+            throw new ApiIllegalArgumentException("The closed from time must be specified in 0.5 hours!");
+
+        else if (durationOfClosedTo != null && ((double) durationOfClosedTo.toMinutes() / 30) % 1 != 0)
+            throw new ApiIllegalArgumentException("The closed to time must be specified in 0.5 hours!");
+    }
+
+
     private void openingClosingExceptions(ClosedAppointmentDto closedAppointmentDto,
                                           SimpleDepartmentDetailsDto simpleDepartmentDetailsDto)
             throws ApiIllegalArgumentException {
-        LocalTime closedFrom = closedAppointmentDto.getClosedForm();
+        LocalTime closedFrom = closedAppointmentDto.getClosedFrom();
         LocalTime closedTo = closedAppointmentDto.getClosedTo();
         LocalTime departmentOpening = simpleDepartmentDetailsDto.getOpening();
         LocalTime departmentClosing = simpleDepartmentDetailsDto.getClosing();
@@ -183,7 +213,7 @@ public class ClosedTimeService {
             throws ApiIllegalArgumentException {
         LocalTime savedClosedFrom = closedTime.getClosedFrom();
         LocalTime savedClosedTo = closedTime.getClosedTo();
-        LocalTime closedFrom = closedAppointmentDto.getClosedForm();
+        LocalTime closedFrom = closedAppointmentDto.getClosedFrom();
         LocalTime closedTo = closedAppointmentDto.getClosedTo();
         LocalTime departmentOpening = simpleDepartmentDetailsDto.getOpening();
         LocalTime departmentClosing = simpleDepartmentDetailsDto.getClosing();
@@ -210,7 +240,7 @@ public class ClosedTimeService {
             throws ApiAlreadyExistException {
         LocalTime savedClosedFrom = closedTime.getClosedFrom();
         LocalTime savedClosedTo = closedTime.getClosedTo();
-        LocalTime closedFrom = closedAppointmentDto.getClosedForm();
+        LocalTime closedFrom = closedAppointmentDto.getClosedFrom();
         LocalTime closedTo = closedAppointmentDto.getClosedTo();
 
         if (closedFrom.compareTo(savedClosedFrom) > 0 && closedFrom.compareTo(savedClosedTo) < 0)
