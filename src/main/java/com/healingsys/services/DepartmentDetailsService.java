@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -101,12 +103,29 @@ public class DepartmentDetailsService {
     private void checkValues(DepartmentDetailsDto departmentDetailsDto)
             throws ApiIllegalArgumentException, ApiNoContentException {
         String departmentName = departmentDetailsDto.getName();
+
+        LocalTime opening = departmentDetailsDto.getOpening();
+        LocalTime closing = departmentDetailsDto.getClosing();
+        LocalTime standard = LocalTime.of(0,0);
+        Duration durationOfOpening = Duration.between(opening, standard);
+        Duration durationOfClosing = Duration.between(closing, standard);
+
         int maxGeneratedDays = departmentDetailsDto.getMaxGeneratedDays();
         int slotMaxCapacity = departmentDetailsDto.getSlotMaxCapacity();
         double slotLengthInHour = departmentDetailsDto.getSlotLengthInHour();
 
+
         if (departmentName == null || departmentName.equals(""))
             throw new ApiNoContentException("Give a name for the Department!");
+
+        if (((double) durationOfOpening.toMinutes() / 30) % 1 != 0)
+            throw new ApiIllegalArgumentException("The opening time must be specified in 0.5 hours!");
+
+        if (((double) durationOfClosing.toMinutes() / 30) % 1 != 0)
+            throw new ApiIllegalArgumentException("The closing time must be specified in 0.5 hours!");
+
+        if (opening.compareTo(closing) >= 0)
+            throw new ApiIllegalArgumentException("The opening time must be less than the closing time!");
 
         if (maxGeneratedDays < 1)
             throw new ApiIllegalArgumentException("The number of days generated cannot be less than 1!");
@@ -116,6 +135,9 @@ public class DepartmentDetailsService {
 
         if (slotMaxCapacity < 1)
             throw new ApiIllegalArgumentException("The slot capacity cannot be less than 1!");
+
+        if ((slotLengthInHour / 0.5) % 1 != 0)
+            throw new ApiIllegalArgumentException("The length of the slots can only be increased or decreased by 0.5 hours!");
 
         if (slotLengthInHour < 0.5)
             throw new ApiIllegalArgumentException("The length of the slot should not be less than 0.5 hours, if the duration of the slot per person is less than 0.5 hours, increase its capacity!");
