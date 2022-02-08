@@ -44,7 +44,7 @@ public class DepartmentDetailsController {
 
 
     @GetMapping("/{id}")
-    public DepartmentDetailsDto getDepartmentDetailsByName(@PathVariable Long id)
+    public DepartmentDetailsDto getDepartmentDetailsById(@PathVariable Long id)
             throws ApiNoSuchElementException {
 
         return departmentDetailsService.getById(id);
