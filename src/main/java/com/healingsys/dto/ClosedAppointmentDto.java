@@ -13,6 +13,6 @@ import java.time.LocalTime;
 public class ClosedAppointmentDto {
     private Long id;
     private LocalDate date;
-    private LocalTime closedForm;
+    private LocalTime closedFrom;
     private LocalTime closedTo;
 }

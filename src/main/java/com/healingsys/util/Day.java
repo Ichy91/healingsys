@@ -43,6 +43,9 @@ public class Day {
         List<ClosedAppointmentDto> closedAppointments =
                 closedTimeService.getAllClosedAppointmentByDepartmentAndDay(departmentId, day);
 
+        if (closedHours == null) closedHours = new ArrayList<>();
+        else closedHours.clear();
+
         if (closedAppointments != null) setupClosedHours(closedAppointments);
 
         if (slots == null) slots = new ArrayList<>();
@@ -57,8 +60,8 @@ public class Day {
         long slotLengthInMinute = (long) (details.getSlotLengthInHour() * 60);
 
         for (var closedAppointment: closedAppointments) {
-            if(closedAppointment.getClosedForm() == null) startTime = details.getOpening();
-            else startTime = closedAppointment.getClosedForm();
+            if(closedAppointment.getClosedFrom() == null) startTime = details.getOpening();
+            else startTime = closedAppointment.getClosedFrom();
 
             if(closedAppointment.getClosedTo() == null) endTime = details.getClosing();
             else endTime = closedAppointment.getClosedTo();
