@@ -64,9 +64,9 @@ public class DepartmentDetailsService {
         Optional<DepartmentDetails> departmentDetails = departmentDetailsRepository.findById(id);
 
         if (departmentDetails.isEmpty())
-            throw new ApiNoSuchElementException(String.format("No find Department with %s id", id));
+            throw new ApiNoSuchElementException(String.format("No find Department with id: %s!", id));
 
-        return mapToModifyDto(departmentDetails.get());
+        return mapToDepartmentDto(departmentDetails.get());
     }
 
 
@@ -87,9 +87,9 @@ public class DepartmentDetailsService {
 
     public String updateDepartmentDetails(DepartmentDetailsDto departmentDetailsDto, Long id)
             throws ApiNoSuchElementException, ApiIllegalArgumentException, ApiNoContentException {
-        if (departmentDetailsRepository.findById(id).isEmpty()) {
-            throw new ApiNoSuchElementException(String.format("No find Department with %s id", id));
-        }
+        if (departmentDetailsRepository.findById(id).isEmpty())
+            throw new ApiNoSuchElementException(String.format("No find Department with id: %s!", id));
+
         checkValues(departmentDetailsDto);
 
         DepartmentDetails departmentDetails = mapToEntity(departmentDetailsDto);
@@ -161,7 +161,7 @@ public class DepartmentDetailsService {
         return mapper.map(departmentDetails, SimpleDepartmentDetailsDto.class);
     }
 
-    private DepartmentDetailsDto mapToModifyDto(DepartmentDetails departmentDetails) {
+    private DepartmentDetailsDto mapToDepartmentDto(DepartmentDetails departmentDetails) {
         return mapper.map(departmentDetails, DepartmentDetailsDto.class);
     }
 
