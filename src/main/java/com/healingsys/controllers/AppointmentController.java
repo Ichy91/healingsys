@@ -20,9 +20,9 @@ public class AppointmentController {
 
     @GetMapping("/appointments")
     public List<Day> getDepartmentDays(@RequestParam(value = "departmentId") Long departmentId,
-                                       @RequestParam(value = "userId") UUID userId)
+                                                      @RequestParam(value = "userId") UUID userId)
             throws ApiNoSuchElementException, ApiIllegalArgumentException {
 
-        return appointmentManagerService.appointmentHandler(departmentId);
+        return appointmentManagerService.appointmentHandler(departmentId, userId);
     }
 }

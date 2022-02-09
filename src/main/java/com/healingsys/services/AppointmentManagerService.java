@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @Data
@@ -26,13 +27,15 @@ public class AppointmentManagerService {
     private List<Day> days;
     private DepartmentDetailsDto details;
     private Long departmentId;
+    private UUID userId;
 
 
-    public List<Day> appointmentHandler(Long departmentId)
+    public List<Day> appointmentHandler(Long departmentId, UUID userId)
             throws ApiNoSuchElementException, ApiIllegalArgumentException {
         LocalDateTime now = LocalDateTime.now();
         details = departmentDetailsService.getById(departmentId);
         this.departmentId = departmentId;
+        this.userId = userId; //TODO check userId
 
         if (days == null) days = new ArrayList<>();
         else days.clear();
