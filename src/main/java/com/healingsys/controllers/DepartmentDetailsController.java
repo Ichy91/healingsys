@@ -8,6 +8,8 @@ import com.healingsys.exception.ApiNoContentException;
 import com.healingsys.exception.ApiNoSuchElementException;
 import com.healingsys.services.DepartmentDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,19 +54,23 @@ public class DepartmentDetailsController {
 
 
     @PostMapping("/add")
-    public String addDepartmentDetails(@RequestBody DepartmentDetailsDto departmentDetailsDto)
+    public ResponseEntity<String> addDepartmentDetails(@RequestBody DepartmentDetailsDto departmentDetailsDto)
             throws ApiAlreadyExistException, ApiIllegalArgumentException, ApiNoContentException {
 
-        return departmentDetailsService.saveDepartmentDetails(departmentDetailsDto);
+        return new ResponseEntity<>(
+                departmentDetailsService.saveDepartmentDetails(departmentDetailsDto),
+                HttpStatus.CREATED);
     }
 
 
     @PutMapping("/update/{id}")
-    public String updateDepartmentDetails(
+    public ResponseEntity<String> updateDepartmentDetails(
             @PathVariable Long id,
             @RequestBody DepartmentDetailsDto departmentDetailsDto)
             throws ApiAlreadyExistException, ApiIllegalArgumentException, ApiNoContentException {
 
-        return departmentDetailsService.updateDepartmentDetails(departmentDetailsDto, id);
+        return new ResponseEntity<>(
+                departmentDetailsService.updateDepartmentDetails(departmentDetailsDto, id),
+                HttpStatus.ACCEPTED);
     }
 }

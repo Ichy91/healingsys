@@ -5,6 +5,8 @@ import com.healingsys.dto.SimpleDepartmentDetailsDto;
 import com.healingsys.exception.*;
 import com.healingsys.services.ClosedTimeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -43,26 +45,32 @@ public class ClosedTimeController {
 
 
     @PostMapping("/save")
-    public String addClosedAppointment(@RequestBody ClosedAppointmentDto closedAppointmentDto,
-                                       @RequestBody SimpleDepartmentDetailsDto simpleDepartmentDetailsDto)
-            throws ApiNoSuchElementException, ApiIllegalAccessException, ApiAlreadyExistException, ApiIllegalArgumentException {
+    public ResponseEntity<String> addClosedAppointment(@RequestBody ClosedAppointmentDto closedAppointmentDto,
+                                                      @RequestBody SimpleDepartmentDetailsDto simpleDepartmentDetailsDto)
+            throws ApiNoSuchElementException, ApiIllegalMethodException, ApiAlreadyExistException, ApiIllegalArgumentException {
 
-        return closedTimeService.saveClosedAppointment(closedAppointmentDto, simpleDepartmentDetailsDto);
+        return new ResponseEntity<>(
+                closedTimeService.saveClosedAppointment(closedAppointmentDto, simpleDepartmentDetailsDto),
+                HttpStatus.CREATED);
     }
 
 
     @PutMapping("/update")
-    public String updateClosedAppointment(@RequestBody ClosedAppointmentDto closedAppointmentDto)
-            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalAccessException {
+    public ResponseEntity<String> updateClosedAppointment(@RequestBody ClosedAppointmentDto closedAppointmentDto)
+            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalMethodException {
 
-        return closedTimeService.updateClosedAppointment(closedAppointmentDto);
+        return new ResponseEntity<>(
+                closedTimeService.updateClosedAppointment(closedAppointmentDto),
+                HttpStatus.ACCEPTED);
     }
 
 
     @DeleteMapping("/delete")
-    public String deleteClosedAppointment(@RequestBody ClosedAppointmentDto closedAppointmentDto)
-            throws ApiNoSuchElementException, ApiIllegalAccessException {
+    public ResponseEntity<String> deleteClosedAppointment(@RequestBody ClosedAppointmentDto closedAppointmentDto)
+            throws ApiNoSuchElementException, ApiIllegalMethodException {
 
-        return closedTimeService.deleteClosedAppointment(closedAppointmentDto);
+        return new ResponseEntity<>(
+                closedTimeService.deleteClosedAppointment(closedAppointmentDto),
+                HttpStatus.ACCEPTED);
     }
 }
