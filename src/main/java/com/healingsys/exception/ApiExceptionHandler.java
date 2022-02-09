@@ -49,9 +49,9 @@ public class ApiExceptionHandler {
         return new ResponseEntity<>(apiException, illegalArgument);
     }
 
-    @ExceptionHandler(value = {ApiIllegalAccessException.class})
-    public ResponseEntity<Object> handleApiIllegalAccessException(ApiIllegalAccessException e) {
-        HttpStatus illegalAccess = HttpStatus.UNAUTHORIZED;
+    @ExceptionHandler(value = {ApiIllegalMethodException.class})
+    public ResponseEntity<Object> handleApiIllegalMethodException(ApiIllegalMethodException e) {
+        HttpStatus illegalAccess = HttpStatus.METHOD_NOT_ALLOWED;
 
         ApiException apiException = new ApiException(
                 e.getMessage(),

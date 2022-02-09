@@ -68,7 +68,7 @@ public class ClosedTimeService {
 
 
     public String updateClosedAppointment(ClosedAppointmentDto closedAppointmentDto)
-            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalAccessException, ApiIllegalArgumentException {
+            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalMethodException, ApiIllegalArgumentException {
         Long id = closedAppointmentDto.getId();
 
         if (closedTimeRepository.findById(id).isEmpty())
@@ -81,7 +81,7 @@ public class ClosedTimeService {
         LocalDate appointmentDate = closedAppointmentDto.getDate();
 
         if (closedTimeDate.compareTo(appointmentDate) != 0)
-            throw new ApiIllegalAccessException("Changing the date is not allowed!");
+            throw new ApiIllegalMethodException("Changing the date is not allowed!");
 
         closedTime.setClosedFrom(closedAppointmentDto.getClosedFrom());
         closedTime.setClosedTo(closedAppointmentDto.getClosedTo());
@@ -94,7 +94,7 @@ public class ClosedTimeService {
 
     public String saveClosedAppointment(ClosedAppointmentDto closedAppointmentDto,
                                         SimpleDepartmentDetailsDto simpleDepartmentDetailsDto)
-            throws ApiNoSuchElementException, ApiIllegalAccessException, ApiAlreadyExistException, ApiIllegalArgumentException {
+            throws ApiNoSuchElementException, ApiIllegalMethodException, ApiAlreadyExistException, ApiIllegalArgumentException {
         checkToSave(closedAppointmentDto, simpleDepartmentDetailsDto);
 
         closedTimeRepository.save(mapToEntity(closedAppointmentDto));
@@ -107,7 +107,7 @@ public class ClosedTimeService {
 
 
     public String deleteClosedAppointment(ClosedAppointmentDto closedAppointmentDto)
-            throws ApiNoSuchElementException, ApiIllegalAccessException {
+            throws ApiNoSuchElementException, ApiIllegalMethodException {
         Long id = closedAppointmentDto.getId();
         LocalDate appointmentDate = closedAppointmentDto.getDate();
         LocalDate toDay = LocalDate.now();
@@ -116,7 +116,7 @@ public class ClosedTimeService {
             throw new ApiNoSuchElementException(String.format("Closed appointment not found with id: %s", id));
 
         else if (appointmentDate.compareTo(toDay) <= 0)
-            throw new ApiIllegalAccessException(String.format("Deletion is not allowed before the current (%s) date", toDay));
+            throw new ApiIllegalMethodException(String.format("Deletion is not allowed before the current (%s) date", toDay));
 
         closedTimeRepository.deleteById(id);
 
@@ -130,7 +130,7 @@ public class ClosedTimeService {
 
     private void checkToSave(ClosedAppointmentDto closedAppointmentDto,
                              SimpleDepartmentDetailsDto simpleDepartmentDetailsDto)
-            throws ApiNoSuchElementException, ApiIllegalAccessException, ApiAlreadyExistException, ApiIllegalArgumentException {
+            throws ApiNoSuchElementException, ApiIllegalMethodException, ApiAlreadyExistException, ApiIllegalArgumentException {
         LocalDate appointmentDate = closedAppointmentDto.getDate();
         LocalTime closedFrom = closedAppointmentDto.getClosedFrom();
         LocalTime closedTo = closedAppointmentDto.getClosedTo();
@@ -156,7 +156,7 @@ public class ClosedTimeService {
 
 
     private void checkClosedAppointmentValues(ClosedAppointmentDto closedAppointmentDto)
-            throws ApiNoContentException, ApiIllegalAccessException, ApiIllegalArgumentException {
+            throws ApiNoContentException, ApiIllegalMethodException, ApiIllegalArgumentException {
         LocalDate toDay = LocalDate.now();
         LocalDate appointmentDate = closedAppointmentDto.getDate();
 
@@ -176,7 +176,7 @@ public class ClosedTimeService {
             throw new ApiNoContentException("Missing date!");
 
         else if (appointmentDate.compareTo(toDay) <= 0)
-            throw new ApiIllegalAccessException(String.format("The Operation is not allowed before the current (%s) date", toDay));
+            throw new ApiIllegalMethodException(String.format("The Operation is not allowed before the current (%s) date", toDay));
 
         if (closedFrom != null && closedTo != null && closedFrom.compareTo(closedTo) >= 0)
             throw new ApiIllegalArgumentException("The closing from time must be less than the closing to time!");
