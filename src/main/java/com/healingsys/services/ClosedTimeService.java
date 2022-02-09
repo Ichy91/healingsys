@@ -27,7 +27,7 @@ public class ClosedTimeService {
         Optional<ClosedTime> closedTime = closedTimeRepository.findById(id);
 
         if (closedTime.isEmpty())
-            throw new ApiNoSuchElementException(String.format("No find closed appointment with %s id", id));
+            throw new ApiNoSuchElementException(String.format("No find closed appointment with id: %s!", id));
 
         return mapToDto(closedTime.get());
     }
@@ -38,7 +38,8 @@ public class ClosedTimeService {
         List<ClosedTime> closedTimeList = closedTimeRepository.findAllByDepartmentDetailsId(departmentId);
 
         if (closedTimeList.isEmpty())
-            throw new ApiNoSuchElementException("No find closed Appointments!");
+            throw new ApiNoSuchElementException(
+                    String.format("No find closed Appointments with department id: %s!", departmentId));
 
         return createClosedAppointmentDtoList(closedTimeList);
     }
@@ -50,7 +51,8 @@ public class ClosedTimeService {
                 closedTimeRepository.findAllByDepartmentDetailsIdAndDateGreaterThanEqualOrderByDate(departmentId, day);
 
         if (closedTimeList.isEmpty())
-            throw new ApiNoSuchElementException("No find closed Appointments!");
+            throw new ApiNoSuchElementException(
+                    String.format("No find closed Appointments with department id: %s from %s!", departmentId, day));
 
         return createClosedAppointmentDtoList(closedTimeList);
     }
@@ -72,7 +74,7 @@ public class ClosedTimeService {
         Long id = closedAppointmentDto.getId();
 
         if (closedTimeRepository.findById(id).isEmpty())
-            throw new ApiNoSuchElementException(String.format("Closed appointment not found with id: %s", id));
+            throw new ApiNoSuchElementException(String.format("Closed appointment not found with id: %s!", id));
 
         checkClosedAppointmentValues(closedAppointmentDto);
 
@@ -113,14 +115,14 @@ public class ClosedTimeService {
         LocalDate toDay = LocalDate.now();
 
         if (closedTimeRepository.findById(id).isEmpty())
-            throw new ApiNoSuchElementException(String.format("Closed appointment not found with id: %s", id));
+            throw new ApiNoSuchElementException(String.format("Closed appointment not found with id: %s!", id));
 
         else if (appointmentDate.compareTo(toDay) <= 0)
-            throw new ApiIllegalMethodException(String.format("Deletion is not allowed before the current (%s) date", toDay));
+            throw new ApiIllegalMethodException(String.format("Deletion is not allowed before the current (%s) date!", toDay));
 
         closedTimeRepository.deleteById(id);
 
-        return String.format("Closed appointment deleted! | id: %s, date: %s %s-%s",
+        return String.format("Closed appointment deleted! | id: %s, date: %s %s-%s!",
                 closedAppointmentDto.getId(),
                 closedAppointmentDto.getDate(),
                 closedAppointmentDto.getClosedFrom(),
