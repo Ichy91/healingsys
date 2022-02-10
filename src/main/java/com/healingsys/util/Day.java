@@ -3,6 +3,8 @@ package com.healingsys.util;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.healingsys.dto.ClosedAppointmentDto;
 import com.healingsys.dto.DepartmentDetailsDto;
+import com.healingsys.entities.Appointment;
+import com.healingsys.entities.enums.AppointmentStatus;
 import com.healingsys.services.AppointmentService;
 import com.healingsys.services.ClosedTimeService;
 import lombok.Data;
@@ -12,6 +14,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class Day {
@@ -22,7 +25,19 @@ public class Day {
     @JsonIgnore
     private DepartmentDetailsDto details;
     @JsonIgnore
+    private Long departmentId;
+    @JsonIgnore
     private List<LocalTime> closedHours;
+    @JsonIgnore
+    private List<LocalTime> reservedHours;
+    @JsonIgnore
+    private List<LocalTime> completedHours;
+    @JsonIgnore
+    private List<LocalTime> missedHours;
+    @JsonIgnore
+    private List<LocalTime> canceledHours;
+    @JsonIgnore
+    private boolean hasReservation;
 
     private LocalDate day;
     private List<Slot> slots;
@@ -31,20 +46,28 @@ public class Day {
     public Day(AppointmentService appointmentService,
                ClosedTimeService closedTimeService,
                DepartmentDetailsDto details,
-               LocalDate day) {
+               LocalDate day,
+               Long departmentId) {
         this.appointmentService = appointmentService;
         this.closedTimeService = closedTimeService;
         this.details = details;
         this.day = day;
+        this.departmentId = departmentId;
     }
 
 
-    public void dayHandler(Long departmentId) {
+    public void dayHandler(List<Appointment> reservedAppointments, UUID userId) {
         List<ClosedAppointmentDto> closedAppointments =
                 closedTimeService.getAllClosedAppointmentByDepartmentAndDay(departmentId, day);
 
-        if (closedHours == null) closedHours = new ArrayList<>();
-        else closedHours.clear();
+        closedHours = listOfHoursInitialisation(closedHours);
+        reservedHours = listOfHoursInitialisation(reservedHours);
+        completedHours = listOfHoursInitialisation(completedHours);
+        missedHours = listOfHoursInitialisation(missedHours);
+        canceledHours = listOfHoursInitialisation(canceledHours);
+
+        if (userId != null) userAppointmentsHandler(reservedAppointments, userId);
+        else hasReservation = false;
 
         if (closedAppointments != null) setupClosedHours(closedAppointments);
 
@@ -53,6 +76,15 @@ public class Day {
 
         setupSlots();
     }
+
+
+    private List<LocalTime> listOfHoursInitialisation(List<LocalTime> hoursList) {
+        if (hoursList == null) hoursList = new ArrayList<>();
+        else hoursList.clear();
+
+        return hoursList;
+    }
+
 
     private void setupClosedHours(List<ClosedAppointmentDto> closedAppointments) {
         LocalTime startTime;
@@ -73,6 +105,7 @@ public class Day {
         }
     }
 
+
     private void setupSlots() {
         int slotsNumberOfDay = calculateNumberOfSlots();
         long slotLengthInMinute = (long) (details.getSlotLengthInHour() * 60);
@@ -84,6 +117,7 @@ public class Day {
         }
     }
 
+
     private Slot generateSlot(LocalTime time) {
         Slot actualSlot = new Slot();
         actualSlot.setTime(time);
@@ -92,12 +126,16 @@ public class Day {
         return actualSlot;
     }
 
+
     private void slotSetting(Slot slot) {
-        int numberOfReservation = appointmentService.getReservedAppointmentsByDayAndHour(day, slot.getTime()).size();
+        int numberOfReservation = appointmentService.getReservedAppointmentsByDepartmentAndDayAndHour(departmentId, day, slot.getTime()).size();
         slot.setCapacity(details.getSlotMaxCapacity());
         slot.setReserved(numberOfReservation);
 
-        if (closedHours.contains(slot.getTime()))
+        if (hasReservation)
+            slot.setSlotStatus(SlotStatus.INACTIVE);
+
+        else if (closedHours.contains(slot.getTime()))
             slot.setSlotStatus(SlotStatus.INACTIVE);
 
         else if (numberOfReservation >= slot.getCapacity())
@@ -107,12 +145,55 @@ public class Day {
             slot.setSlotStatus(SlotStatus.INACTIVE);
 
         else slot.setSlotStatus(SlotStatus.ACTIVE);
+
+        slotAppointmentStatusSetting(slot);
     }
+
+
+    public void slotAppointmentStatusSetting(Slot slot) {
+        if (reservedHours.contains(slot.getTime()))
+            slot.setAppointmentStatus(AppointmentStatus.RESERVED);
+
+        else if (completedHours.contains(slot.getTime()))
+            slot.setAppointmentStatus(AppointmentStatus.COMPLETED);
+
+        else if (missedHours.contains(slot.getTime()))
+            slot.setAppointmentStatus(AppointmentStatus.MISSED);
+
+        else if (canceledHours.contains(slot.getTime()))
+            slot.setAppointmentStatus(AppointmentStatus.CANCELED);
+    }
+
+
+    private void userAppointmentsHandler(List<Appointment> reservedAppointments, UUID userId) {
+        hasReservation = !reservedAppointments.isEmpty();
+
+        List<Appointment> reservedAppointmentsToDay =
+                appointmentService.getReservedAppointmentsByDepartmentAndUserAndDay(departmentId, userId, day);
+        List<Appointment> completedAppointmentsToDay =
+                appointmentService.getCompletedAppointmentsByDepartmentAndUserAndDay(departmentId, userId, day);
+        List<Appointment> missedAppointmentsToDay =
+                appointmentService.getMissedAppointmentsByDepartmentAndUserAndDay(departmentId, userId, day);
+        List<Appointment> canceledAppointmentsToDay =
+                appointmentService.getCanceledAppointmentsByDepartmentAndUserAndDay(departmentId, userId, day);
+
+        appointmentHoursHandler(reservedAppointmentsToDay, reservedHours);
+        appointmentHoursHandler(completedAppointmentsToDay, completedHours);
+        appointmentHoursHandler(missedAppointmentsToDay, missedHours);
+        appointmentHoursHandler(canceledAppointmentsToDay, canceledHours);
+    }
+
+
+    private void appointmentHoursHandler(List<Appointment> appointments, List<LocalTime> hours) {
+        if (!appointments.isEmpty()){
+            for (var appointment : appointments)
+                hours.add(appointment.getHour());
+        }
+    }
+
 
     private int calculateNumberOfSlots() {
         long openHours = ChronoUnit.HOURS.between(details.getOpening(), details.getClosing());
         return (int) Math.floor(openHours / details.getSlotLengthInHour());
     }
-
-
 }
