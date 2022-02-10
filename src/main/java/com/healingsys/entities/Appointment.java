@@ -24,6 +24,10 @@ public class Appointment {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "department_id", referencedColumnName = "id")
+    private DepartmentDetails department;
+
     @NotNull
     private LocalDate date;
 
