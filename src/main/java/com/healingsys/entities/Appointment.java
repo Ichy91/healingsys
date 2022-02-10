@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Data
@@ -23,11 +24,15 @@ public class Appointment {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "department_id", referencedColumnName = "id")
+    private DepartmentDetails department;
+
     @NotNull
     private LocalDate date;
 
     @NotNull
-    private String hour;
+    private LocalTime hour;
 
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
