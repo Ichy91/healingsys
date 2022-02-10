@@ -74,4 +74,17 @@ public class ApiExceptionHandler {
 
         return new ResponseEntity<>(apiException, noContent);
     }
+
+    @ExceptionHandler(value = {ApiNotCompletedException.class})
+    public ResponseEntity<Object> handleApiNotCompletedException(ApiNotCompletedException e) {
+        HttpStatus noContent = HttpStatus.CONFLICT;
+
+        ApiException apiException = new ApiException(
+                e.getMessage(),
+                noContent,
+                ZonedDateTime.now()
+        );
+
+        return new ResponseEntity<>(apiException, noContent);
+    }
 }
