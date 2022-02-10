@@ -89,7 +89,7 @@ public class Day {
     private void setupClosedHours(List<ClosedAppointmentDto> closedAppointments) {
         LocalTime startTime;
         LocalTime endTime;
-        long slotLengthInMinute = (long) (details.getSlotLengthInHour() * 60);
+        int slotLengthInMinute = (int) (details.getSlotLengthInHour() * 60);
 
         for (var closedAppointment: closedAppointments) {
             if(closedAppointment.getClosedFrom() == null) startTime = details.getOpening();
