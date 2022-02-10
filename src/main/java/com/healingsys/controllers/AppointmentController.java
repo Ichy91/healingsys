@@ -2,6 +2,7 @@ package com.healingsys.controllers;
 
 import com.healingsys.exception.ApiIllegalArgumentException;
 import com.healingsys.exception.ApiNoSuchElementException;
+import com.healingsys.exception.ApiNotCompletedException;
 import com.healingsys.services.AppointmentManagerService;
 import com.healingsys.services.AppointmentService;
 import com.healingsys.util.Day;
@@ -21,7 +22,7 @@ public class AppointmentController {
     @GetMapping("/appointments")
     public List<Day> getDepartmentDays(@RequestParam(value = "departmentId") Long departmentId,
                                        @RequestParam(value = "userId", required = false) UUID userId)
-            throws ApiNoSuchElementException, ApiIllegalArgumentException {
+            throws ApiNoSuchElementException, ApiIllegalArgumentException, ApiNotCompletedException {
 
         return appointmentManagerService.appointmentHandler(departmentId, userId);
     }
