@@ -49,7 +49,7 @@ public class DepartmentDetailsController {
     public DepartmentDetailsDto getDepartmentDetailsById(@PathVariable Long id)
             throws ApiNoSuchElementException {
 
-        return departmentDetailsService.getById(id);
+        return departmentDetailsService.getDepartmentDtoById(id);
     }
 
 
