@@ -1,8 +1,8 @@
 package com.healingsys.services;
 
-import com.healingsys.dto.DepartmentDetailsDto;
 import com.healingsys.entities.Appointment;
 import com.healingsys.entities.DayOfWeek;
+import com.healingsys.entities.DepartmentDetails;
 import com.healingsys.entities.enums.AppointmentStatus;
 import com.healingsys.exception.ApiIllegalArgumentException;
 import com.healingsys.exception.ApiNoSuchElementException;
@@ -30,15 +30,16 @@ public class AppointmentManagerService {
 
     private List<Day> days;
     private List<Appointment> reservedAppointments;
-    private DepartmentDetailsDto details;
-    private Long departmentId;
+    private DepartmentDetails details;
     private UUID userId;
 
+    //Using DepartmentDetails entity
+    //Using Stream in the Day class for getting the daily data to use
+    //All data from the DB, what we use in the Day class taking with this service
 
     public List<Day> appointmentHandler(Long departmentId, UUID userId)
             throws ApiNoSuchElementException, ApiIllegalArgumentException, ApiNotCompletedException {
-        details = departmentDetailsService.getById(departmentId);
-        this.departmentId = departmentId;
+        details = departmentDetailsService.getEntityById(departmentId);
 
         if (reservedAppointments == null) reservedAppointments = new ArrayList<>();
         else reservedAppointments.clear();
@@ -73,7 +74,7 @@ public class AppointmentManagerService {
     }
 
     private void generateDay(LocalDate today) {
-        Day actualDay = new Day(appointmentService, closedTimeService, details, today, departmentId);
+        Day actualDay = new Day(appointmentService, closedTimeService, details, today);
         actualDay.dayHandler(reservedAppointments, userId);
         days.add(actualDay);
     }
@@ -83,7 +84,7 @@ public class AppointmentManagerService {
         userService.getById(userId);
         this.userId = userId;
         reservedAppointments =
-                appointmentService.getReservedAppointmentsByDepartmentIdAndUserId(departmentId, userId);
+                appointmentService.getReservedAppointmentsByDepartmentIdAndUserId(details.getId(), userId);
 
         if (!reservedAppointments.isEmpty())
             reservedAppointmentHandler(reservedAppointments);

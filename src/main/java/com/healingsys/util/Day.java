@@ -2,8 +2,8 @@ package com.healingsys.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.healingsys.dto.ClosedAppointmentDto;
-import com.healingsys.dto.DepartmentDetailsDto;
 import com.healingsys.entities.Appointment;
+import com.healingsys.entities.DepartmentDetails;
 import com.healingsys.entities.enums.AppointmentStatus;
 import com.healingsys.services.AppointmentService;
 import com.healingsys.services.ClosedTimeService;
@@ -23,9 +23,7 @@ public class Day {
     @JsonIgnore
     private ClosedTimeService closedTimeService;
     @JsonIgnore
-    private DepartmentDetailsDto details;
-    @JsonIgnore
-    private Long departmentId;
+    private DepartmentDetails details;
     @JsonIgnore
     private List<LocalTime> closedHours;
     @JsonIgnore
@@ -45,20 +43,18 @@ public class Day {
 
     public Day(AppointmentService appointmentService,
                ClosedTimeService closedTimeService,
-               DepartmentDetailsDto details,
-               LocalDate day,
-               Long departmentId) {
+               DepartmentDetails details,
+               LocalDate day) {
         this.appointmentService = appointmentService;
         this.closedTimeService = closedTimeService;
         this.details = details;
         this.day = day;
-        this.departmentId = departmentId;
     }
 
 
     public void dayHandler(List<Appointment> reservedAppointments, UUID userId) {
         List<ClosedAppointmentDto> closedAppointments =
-                closedTimeService.getAllClosedAppointmentByDepartmentAndDay(departmentId, day);
+                closedTimeService.getAllClosedAppointmentByDepartmentAndDay(details.getId(), day);
 
         closedHours = listOfHoursInitialisation(closedHours);
         reservedHours = listOfHoursInitialisation(reservedHours);
@@ -128,7 +124,7 @@ public class Day {
 
 
     private void slotSetting(Slot slot) {
-        int numberOfReservation = appointmentService.getReservedAppointmentsByDepartmentAndDayAndHour(departmentId, day, slot.getTime()).size();
+        int numberOfReservation = appointmentService.getReservedAppointmentsByDepartmentAndDayAndHour(details.getId(), day, slot.getTime()).size();
         slot.setCapacity(details.getSlotMaxCapacity());
         slot.setReserved(numberOfReservation);
 
@@ -169,13 +165,13 @@ public class Day {
         hasReservation = !reservedAppointments.isEmpty();
 
         List<Appointment> reservedAppointmentsToDay =
-                appointmentService.getReservedAppointmentsByDepartmentAndUserAndDay(departmentId, userId, day);
+                appointmentService.getReservedAppointmentsByDepartmentAndUserAndDay(details.getId(), userId, day);
         List<Appointment> completedAppointmentsToDay =
-                appointmentService.getCompletedAppointmentsByDepartmentAndUserAndDay(departmentId, userId, day);
+                appointmentService.getCompletedAppointmentsByDepartmentAndUserAndDay(details.getId(), userId, day);
         List<Appointment> missedAppointmentsToDay =
-                appointmentService.getMissedAppointmentsByDepartmentAndUserAndDay(departmentId, userId, day);
+                appointmentService.getMissedAppointmentsByDepartmentAndUserAndDay(details.getId(), userId, day);
         List<Appointment> canceledAppointmentsToDay =
-                appointmentService.getCanceledAppointmentsByDepartmentAndUserAndDay(departmentId, userId, day);
+                appointmentService.getCanceledAppointmentsByDepartmentAndUserAndDay(details.getId(), userId, day);
 
         appointmentHoursHandler(reservedAppointmentsToDay, reservedHours);
         appointmentHoursHandler(completedAppointmentsToDay, completedHours);
