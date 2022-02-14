@@ -59,14 +59,17 @@ public class DepartmentDetailsService {
     }
 
 
-    public DepartmentDetailsDto getById(Long id)
+    public DepartmentDetailsDto getDepartmentDtoById(Long id)
             throws ApiNoSuchElementException {
-        Optional<DepartmentDetails> departmentDetails = departmentDetailsRepository.findById(id);
 
-        if (departmentDetails.isEmpty())
-            throw new ApiNoSuchElementException(String.format("No find Department with id: %s!", id));
+        return mapToDepartmentDto(getById(id));
+    }
 
-        return mapToDepartmentDto(departmentDetails.get());
+
+    public DepartmentDetails getEntityById(Long id)
+            throws ApiNoSuchElementException {
+
+        return getById(id);
     }
 
 
@@ -97,6 +100,17 @@ public class DepartmentDetailsService {
         departmentDetailsRepository.save(departmentDetails);
 
         return "Operation details updated!";
+    }
+
+
+    private DepartmentDetails getById(Long departmentId)
+            throws ApiNoSuchElementException {
+        Optional<DepartmentDetails> departmentDetails = departmentDetailsRepository.findById(departmentId);
+
+        if (departmentDetails.isEmpty())
+            throw new ApiNoSuchElementException(String.format("No find Department with id: %s!", departmentId));
+
+        return departmentDetails.get();
     }
 
 
