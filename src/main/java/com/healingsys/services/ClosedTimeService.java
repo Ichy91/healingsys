@@ -58,14 +58,8 @@ public class ClosedTimeService {
     }
 
 
-    public List<ClosedAppointmentDto> getAllClosedAppointmentByDepartmentAndDay(Long departmentId, LocalDate day) {
-        List<ClosedTime> closedTimes =
-                closedTimeRepository.findAllByDepartmentDetailsIdAndDateOrderByClosedFrom(departmentId, day);
-
-        if (closedTimes.isEmpty())
-            return null;
-
-        return createClosedAppointmentDtoList(closedTimes);
+    public List<ClosedTime> getClosedEntitiesByDepartmentFromDay(Long departmentId, LocalDate day) {
+        return closedTimeRepository.findAllByDepartmentDetailsIdAndDateGreaterThanEqualOrderByDate(departmentId, day);
     }
 
 

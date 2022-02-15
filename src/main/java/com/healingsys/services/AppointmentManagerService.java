@@ -1,6 +1,7 @@
 package com.healingsys.services;
 
 import com.healingsys.entities.Appointment;
+import com.healingsys.entities.ClosedTime;
 import com.healingsys.entities.DayOfWeek;
 import com.healingsys.entities.DepartmentDetails;
 import com.healingsys.entities.enums.AppointmentStatus;
@@ -28,33 +29,40 @@ public class AppointmentManagerService {
     private final DepartmentDetailsService departmentDetailsService;
     private final UserService userService;
 
-    private List<Day> days;
-    private List<Appointment> reservedAppointments;
-    private DepartmentDetails details;
     private UUID userId;
+    private DepartmentDetails details;
+    private List<Appointment> appointments;
+    private List<ClosedTime> closedAppointments;
 
-    //Using DepartmentDetails entity
-    //Using Stream in the Day class for getting the daily data to use
-    //All data from the DB, what we use in the Day class taking with this service
+    private List<Day> days;
+
 
     public List<Day> appointmentHandler(Long departmentId, UUID userId)
             throws ApiNoSuchElementException, ApiIllegalArgumentException, ApiNotCompletedException {
         details = departmentDetailsService.getEntityById(departmentId);
+        listsInitialisation();
 
-        if (reservedAppointments == null) reservedAppointments = new ArrayList<>();
-        else reservedAppointments.clear();
-
-        if (userId != null) userAppointmentHandler(userId);
-
-        if (days == null) days = new ArrayList<>();
-        else days.clear();
+        appointmentsHandler(userId);
+        closedAppointmentsHandler();
 
         setupDays();
 
         return getDays();
     }
 
+    //Initialisation of the used Lists
+    private void listsInitialisation() {
+        if (appointments == null) appointments = new ArrayList<>();
+        else appointments.clear();
 
+        if (closedAppointments == null) closedAppointments = new ArrayList<>();
+        else closedAppointments.clear();
+
+        if (days == null) days = new ArrayList<>();
+        else days.clear();
+    }
+
+    //Day generating
     private void setupDays() throws ApiIllegalArgumentException{
         LocalDate today = LocalDate.now();
         Set<DayOfWeek> closedDay = details.getClosedDay();
@@ -74,23 +82,33 @@ public class AppointmentManagerService {
     }
 
     private void generateDay(LocalDate today) {
-        Day actualDay = new Day(appointmentService, closedTimeService, details, today);
-        actualDay.dayHandler(reservedAppointments, userId);
+        Day actualDay = new Day(appointments, closedAppointments, details, today);
+        actualDay.dayHandler(userId);
         days.add(actualDay);
     }
 
-
-    private void userAppointmentHandler(UUID userId) throws ApiNoSuchElementException, ApiNotCompletedException {
-        userService.getById(userId);
+    //Handling of appointments
+    private void appointmentsHandler(UUID userId) throws ApiNoSuchElementException, ApiNotCompletedException {
         this.userId = userId;
-        reservedAppointments =
-                appointmentService.getReservedAppointmentsByDepartmentIdAndUserId(details.getId(), userId);
+        Long departmentId = details.getId();
+        LocalDate today = LocalDate.now();
 
-        if (!reservedAppointments.isEmpty())
-            reservedAppointmentHandler(reservedAppointments);
+        if (userId != null) userAppointmentHandler(userId);
+
+        appointments = appointmentService.getAppointmentsByDepartmentFromDay(departmentId, today);
     }
 
-    private void reservedAppointmentHandler(List<Appointment> reservedAppointments) throws ApiNotCompletedException{
+    private void userAppointmentHandler(UUID userId) throws ApiNoSuchElementException {
+        userService.getById(userId);
+        Long departmentId = details.getId();
+        List<Appointment> userReservedAppointments =
+                appointmentService.getReservedAppointmentsByDepartmentIdAndUserId(departmentId, userId);
+
+        if (!userReservedAppointments.isEmpty())
+            userReservedAppointmentHandler(userReservedAppointments);
+    }
+
+    private void userReservedAppointmentHandler(List<Appointment> reservedAppointments) throws ApiNotCompletedException{
         LocalDateTime now = LocalDateTime.now();
 
         for (var appointment: reservedAppointments) {
@@ -107,4 +125,12 @@ public class AppointmentManagerService {
             }
         }
     }
+
+    private void closedAppointmentsHandler() {
+        LocalDate today = LocalDate.now();
+        Long departmentId = details.getId();
+
+        closedAppointments = closedTimeService.getClosedEntitiesByDepartmentFromDay(departmentId, today);
+    }
+
 }
