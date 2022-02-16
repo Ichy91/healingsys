@@ -1,12 +1,13 @@
 package com.healingsys.controllers;
 
-import com.healingsys.exception.ApiIllegalArgumentException;
-import com.healingsys.exception.ApiNoSuchElementException;
-import com.healingsys.exception.ApiNotCompletedException;
+import com.healingsys.dto.appointment.SaveAppointmentDto;
+import com.healingsys.exception.*;
 import com.healingsys.services.AppointmentManagerService;
 import com.healingsys.services.AppointmentService;
 import com.healingsys.util.Day;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,5 +26,23 @@ public class AppointmentController {
             throws ApiNoSuchElementException, ApiIllegalArgumentException, ApiNotCompletedException {
 
         return appointmentManagerService.appointmentHandler(departmentId, userId);
+    }
+
+    @PostMapping("/reserving")
+    public ResponseEntity<String> appointmentReservation(@RequestParam(value = "departmentId") Long departmentId,
+                                                  @RequestParam(value = "userId") UUID userId,
+                                                  @RequestBody SaveAppointmentDto saveAppointmentDto)
+            throws ApiNoSuchElementException, ApiAlreadyExistException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
+
+        return new ResponseEntity<>(
+                appointmentService.appointmentReservation(departmentId, userId, saveAppointmentDto),
+                HttpStatus.CREATED);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<String> updateAppointment(@RequestParam(value = "departmentId") Long departmentId,
+                                                    @RequestParam(value = "userId") UUID userId,
+                                                    @RequestBody SaveAppointmentDto saveAppointmentDto) {
+        return null;
     }
 }
