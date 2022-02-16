@@ -1,4 +1,4 @@
-package com.healingsys.dto;
+package com.healingsys.dto.closedTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

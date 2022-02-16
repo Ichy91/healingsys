@@ -1,7 +1,7 @@
 package com.healingsys.controllers;
 
-import com.healingsys.dto.DepartmentDetailsDto;
-import com.healingsys.dto.SimpleDepartmentDetailsDto;
+import com.healingsys.dto.department.DepartmentDetailsDto;
+import com.healingsys.dto.department.SimpleDepartmentDetailsDto;
 import com.healingsys.exception.ApiAlreadyExistException;
 import com.healingsys.exception.ApiIllegalArgumentException;
 import com.healingsys.exception.ApiNoContentException;
