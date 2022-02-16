@@ -1,7 +1,7 @@
 package com.healingsys.controllers;
 
-import com.healingsys.dto.ClosedAppointmentDto;
-import com.healingsys.dto.SimpleDepartmentDetailsDto;
+import com.healingsys.dto.closedTime.ClosedAppointmentDto;
+import com.healingsys.dto.department.SimpleDepartmentDetailsDto;
 import com.healingsys.exception.*;
 import com.healingsys.services.ClosedTimeService;
 import lombok.RequiredArgsConstructor;

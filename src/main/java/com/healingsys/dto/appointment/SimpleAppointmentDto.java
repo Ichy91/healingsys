@@ -1,4 +1,4 @@
-package com.healingsys.dto;
+package com.healingsys.dto.appointment;
 
 import com.healingsys.entities.enums.AppointmentStatus;
 import lombok.AllArgsConstructor;

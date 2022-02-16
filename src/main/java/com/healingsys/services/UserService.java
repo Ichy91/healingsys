@@ -18,7 +18,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper mapper;
 
-    public User getById(UUID userId) {
+    public User getById(UUID userId) throws ApiNoSuchElementException {
         Optional<User> user = userRepository.findById(userId);
 
         if (user.isEmpty())

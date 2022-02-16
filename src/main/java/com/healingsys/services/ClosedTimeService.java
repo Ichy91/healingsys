@@ -1,7 +1,7 @@
 package com.healingsys.services;
 
-import com.healingsys.dto.ClosedAppointmentDto;
-import com.healingsys.dto.SimpleDepartmentDetailsDto;
+import com.healingsys.dto.closedTime.ClosedAppointmentDto;
+import com.healingsys.dto.department.SimpleDepartmentDetailsDto;
 import com.healingsys.entities.ClosedTime;
 import com.healingsys.exception.*;
 import com.healingsys.repositories.ClosedTimeRepository;
@@ -60,6 +60,10 @@ public class ClosedTimeService {
 
     public List<ClosedTime> getClosedEntitiesByDepartmentFromDay(Long departmentId, LocalDate day) {
         return closedTimeRepository.findAllByDepartmentDetailsIdAndDateGreaterThanEqualOrderByDate(departmentId, day);
+    }
+
+    public List<ClosedTime> getClosedEntitiesByDepartmentAndDay(Long departmentId, LocalDate day) {
+        return closedTimeRepository.findAllByDepartmentDetailsIdAndDateOrderByClosedFrom(departmentId, day);
     }
 
 

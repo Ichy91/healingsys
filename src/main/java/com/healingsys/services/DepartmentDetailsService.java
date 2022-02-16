@@ -1,7 +1,7 @@
 package com.healingsys.services;
 
-import com.healingsys.dto.DepartmentDetailsDto;
-import com.healingsys.dto.SimpleDepartmentDetailsDto;
+import com.healingsys.dto.department.DepartmentDetailsDto;
+import com.healingsys.dto.department.SimpleDepartmentDetailsDto;
 import com.healingsys.entities.DepartmentDetails;
 import com.healingsys.entities.enums.Status;
 import com.healingsys.exception.ApiAlreadyExistException;
