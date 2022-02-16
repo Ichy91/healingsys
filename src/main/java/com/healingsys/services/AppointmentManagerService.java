@@ -8,6 +8,7 @@ import com.healingsys.entities.enums.AppointmentStatus;
 import com.healingsys.exception.ApiIllegalArgumentException;
 import com.healingsys.exception.ApiNoSuchElementException;
 import com.healingsys.exception.ApiNotCompletedException;
+import com.healingsys.util.DataHandler;
 import com.healingsys.util.Day;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class AppointmentManagerService {
     private final ClosedTimeService closedTimeService;
     private final DepartmentDetailsService departmentDetailsService;
     private final UserService userService;
+    private final DataHandler dataHandler;
 
     private UUID userId;
     private DepartmentDetails details;
@@ -82,7 +84,7 @@ public class AppointmentManagerService {
     }
 
     private void generateDay(LocalDate today) {
-        Day actualDay = new Day(appointments, closedAppointments, details, today);
+        Day actualDay = new Day(appointments, closedAppointments, details, today, dataHandler);
         actualDay.dayHandler(userId);
         days.add(actualDay);
     }

@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 @Data
 public class Day {
     @JsonIgnore
+    private DataHandler dataHandler;
+    @JsonIgnore
     private DepartmentDetails details;
     @JsonIgnore
     private List<Appointment> appointments;
@@ -45,11 +47,13 @@ public class Day {
     public Day(List<Appointment> appointments,
                List<ClosedTime> closedAppointments,
                DepartmentDetails details,
-               LocalDate day) {
+               LocalDate day,
+               DataHandler dataHandler) {
         this.appointments = appointments;
         this.closedAppointments = closedAppointments;
         this.details = details;
         this.day = day;
+        this.dataHandler = dataHandler;
     }
 
 
@@ -64,7 +68,8 @@ public class Day {
         if (userId != null) userAppointmentsHandler(userId);
         else hasReservation = false;
 
-        if (!closedAppointments.isEmpty()) setupClosedHours();
+        if (!closedAppointments.isEmpty())
+            closedHours = dataHandler.setupClosedHours(details, closedAppointments, closedHours);
 
         if (slots == null) slots = new ArrayList<>();
         else slots.clear();
@@ -177,26 +182,6 @@ public class Day {
         if (!appointments.isEmpty()){
             for (var appointment : appointments)
                 hours.add(appointment.getHour());
-        }
-    }
-
-    //Daily closed hours setting
-    private void setupClosedHours() {
-        LocalTime startTime;
-        LocalTime endTime;
-        int slotLengthInMinute = (int) (details.getSlotLengthInHour() * 60);
-
-        for (var closedAppointment: closedAppointments) {
-            if(closedAppointment.getClosedFrom() == null) startTime = details.getOpening();
-            else startTime = closedAppointment.getClosedFrom();
-
-            if(closedAppointment.getClosedTo() == null) endTime = details.getClosing();
-            else endTime = closedAppointment.getClosedTo();
-
-            while (startTime.compareTo(endTime) < 0) {
-                closedHours.add(startTime);
-                startTime = startTime.plusMinutes(slotLengthInMinute);
-            }
         }
     }
 
