@@ -53,8 +53,12 @@ public class AppointmentController {
 
 
     @PutMapping("/canceling")
-    public ResponseEntity<String> appointmentCanceling(@RequestBody AppointmentDto appointmentDto) {
-        return null;
+    public ResponseEntity<String> appointmentCanceling(@RequestBody AppointmentDto appointmentDto)
+            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
+
+        return new ResponseEntity<>(
+                appointmentService.appointmentCanceling(appointmentDto),
+                HttpStatus.CREATED);
     }
 
 

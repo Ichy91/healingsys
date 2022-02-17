@@ -162,8 +162,38 @@ public class AppointmentService {
                     appointment.getHour()));
     }
 
+    //Canceling
+    public String appointmentCanceling(AppointmentDto appointmentDto)
+            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
+        Appointment appointmentToCancel = mapToEntity(appointmentDto);
+        Appointment appointmentFromDb;
+
+        checkValues(appointmentToCancel);
+
+        appointmentFromDb = appointmentRepository.findById(appointmentToCancel.getId()).get();
+        appointmentToCancel.setUser(appointmentFromDb.getUser());
+        appointmentToCancel.setDepartment(appointmentFromDb.getDepartment());
+
+        if (!appointmentToCancel.getStatus().equals(AppointmentStatus.CANCELED))
+            throw new ApiIllegalMethodException(String.format(
+                    "%s method not supported in the Canceling!", appointmentToCancel.getStatus()));
+
+        return String.format("%s\n" +
+                        "User: %s\n" +
+                        "Department: %s\n" +
+                        "Date: %s\n" +
+                        "Hour: %s\n" +
+                        "Status: %s",
+                update(appointmentToCancel),
+                appointmentToCancel.getUser().getName(),
+                appointmentToCancel.getDepartment().getName(),
+                appointmentToCancel.getDate(),
+                appointmentToCancel.getHour(),
+                appointmentToCancel.getStatus());
+    }
+
     //Updating
-    public String updateAppointment(Appointment appointment) {
+    public String update(Appointment appointment) {
         appointmentRepository.save(appointment);
 
         return "The appointment updated!";
