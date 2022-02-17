@@ -170,7 +170,7 @@ public class AppointmentService {
 
         checkValues(appointmentToCancel);
 
-        appointmentFromDb = appointmentRepository.findById(appointmentToCancel.getId()).get();
+        appointmentFromDb = appointmentRepository.getById(appointmentToCancel.getId());
         appointmentToCancel.setUser(appointmentFromDb.getUser());
         appointmentToCancel.setDepartment(appointmentFromDb.getDepartment());
 
