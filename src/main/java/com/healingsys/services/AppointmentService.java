@@ -78,13 +78,17 @@ public class AppointmentService {
     }
 
     //Reservation
-    public String appointmentReservation(Long departmentId, UUID userId, SimpleAppointmentDto simpleAppointmentDto)
+    public String appointmentReservation(Long departmentId, UUID userId, AppointmentDto appointmentDto)
             throws ApiNoSuchElementException, ApiAlreadyExistException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
-        Appointment newAppointment = mapToEntity(simpleAppointmentDto);
+        Appointment newAppointment = mapToEntity(appointmentDto);
         newAppointment.setUser(userService.getById(userId));
         newAppointment.setDepartment(departmentDetailsService.getEntityById(departmentId));
 
         checkValues(newAppointment);
+
+        if (appointmentDto.getStatus().equals(AppointmentStatus.CANCELED))
+            newAppointment.setStatus(AppointmentStatus.RESERVED);
+
         checkToReservation(newAppointment);
 
         appointmentRepository.save(newAppointment);
@@ -107,7 +111,6 @@ public class AppointmentService {
 
         Long departmentId = appointment.getDepartment().getId();
         UUID userId = appointment.getUser().getId();
-        AppointmentStatus status = appointment.getStatus();
         LocalDate date = appointment.getDate();
         LocalTime hour = appointment.getHour();
 
@@ -115,11 +118,17 @@ public class AppointmentService {
         int numberOfReservations =
                 appointmentRepository.findAllByDepartmentIdAndDateAndHourAndStatus(departmentId, date, hour, AppointmentStatus.RESERVED).size();
 
-        List<Appointment> appointments =
-                appointmentRepository.findAllByDepartmentIdAndUserIdAndStatusAndDateAndHour(departmentId, userId, status, date, hour);
+        List<Appointment> userReservedAppointments = getReservedAppointmentsByDepartmentIdAndUserId(departmentId, userId);
 
-        if (!appointments.isEmpty())
-            throw new ApiAlreadyExistException("The appointment already exist!");
+        if (!userReservedAppointments.isEmpty())
+            throw new ApiAlreadyExistException(String.format(
+                    "YOU HAVE RESERVATION!\n" +
+                            "Department: %s,\n" +
+                            "Date: %s, \n" +
+                            "Hour: %s",
+                    userReservedAppointments.get(0).getDepartment().getName(),
+                    userReservedAppointments.get(0).getDate(),
+                    userReservedAppointments.get(0).getHour()));
 
         if (now.compareTo(LocalDateTime.of(date, hour)) <= 0)
             throw new ApiIllegalMethodException(String.format("Reservation not supported before this time: %s!", now));
@@ -206,6 +215,10 @@ public class AppointmentService {
 
     private Appointment mapToEntity(SimpleAppointmentDto simpleAppointmentDto) {
         return mapper.map(simpleAppointmentDto, Appointment.class);
+    }
+
+    private Appointment mapToEntity(AppointmentDto appointmentDto) {
+        return mapper.map(appointmentDto, Appointment.class);
     }
 
     private AppointmentDto mapToDto(Appointment appointment) {
