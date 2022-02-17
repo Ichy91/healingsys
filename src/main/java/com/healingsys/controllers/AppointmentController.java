@@ -1,7 +1,8 @@
 package com.healingsys.controllers;
 
-import com.healingsys.dto.appointment.SaveAppointmentDto;
-import com.healingsys.exception.*;
+import com.healingsys.dto.appointment.SimpleAppointmentDto;
+import com.healingsys.dto.appointment.AppointmentDto;
+import com.healingsys.exceptions.*;
 import com.healingsys.services.AppointmentManagerService;
 import com.healingsys.services.AppointmentService;
 import com.healingsys.util.Day;
@@ -28,21 +29,36 @@ public class AppointmentController {
         return appointmentManagerService.appointmentHandler(departmentId, userId);
     }
 
+
+    @GetMapping("/userAppointment")
+    public AppointmentDto getUserAppointment(@RequestParam(value = "departmentId") Long departmentId,
+                                             @RequestParam(value = "userId") UUID userId,
+                                             @RequestBody SimpleAppointmentDto simpleAppointmentDto) {
+
+        return appointmentService.getUserAppointment(departmentId, userId, simpleAppointmentDto);
+    }
+
+
     @PostMapping("/reserving")
     public ResponseEntity<String> appointmentReservation(@RequestParam(value = "departmentId") Long departmentId,
                                                   @RequestParam(value = "userId") UUID userId,
-                                                  @RequestBody SaveAppointmentDto saveAppointmentDto)
+                                                  @RequestBody SimpleAppointmentDto simpleAppointmentDto)
             throws ApiNoSuchElementException, ApiAlreadyExistException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
 
         return new ResponseEntity<>(
-                appointmentService.appointmentReservation(departmentId, userId, saveAppointmentDto),
+                appointmentService.appointmentReservation(departmentId, userId, simpleAppointmentDto),
                 HttpStatus.CREATED);
     }
 
+
+    @PutMapping("/canceling")
+    public ResponseEntity<String> appointmentCanceling(@RequestBody AppointmentDto appointmentDto) {
+        return null;
+    }
+
+
     @PutMapping("/update")
-    public ResponseEntity<String> updateAppointment(@RequestParam(value = "departmentId") Long departmentId,
-                                                    @RequestParam(value = "userId") UUID userId,
-                                                    @RequestBody SaveAppointmentDto saveAppointmentDto) {
+    public ResponseEntity<String> updateAppointment(@RequestBody AppointmentDto appointmentDto) {
         return null;
     }
 }
