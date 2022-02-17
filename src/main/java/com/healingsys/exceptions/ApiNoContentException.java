@@ -1,4 +1,4 @@
-package com.healingsys.exception;
+package com.healingsys.exceptions;
 
 public class ApiNoContentException extends RuntimeException {
 

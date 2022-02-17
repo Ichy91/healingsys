@@ -2,7 +2,7 @@ package com.healingsys.controllers;
 
 import com.healingsys.dto.closedTime.ClosedAppointmentDto;
 import com.healingsys.dto.department.SimpleDepartmentDetailsDto;
-import com.healingsys.exception.*;
+import com.healingsys.exceptions.*;
 import com.healingsys.services.ClosedTimeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

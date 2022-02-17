@@ -1,4 +1,4 @@
-package com.healingsys.exception;
+package com.healingsys.exceptions;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
