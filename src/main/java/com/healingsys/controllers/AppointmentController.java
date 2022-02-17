@@ -33,7 +33,8 @@ public class AppointmentController {
     @GetMapping("/userAppointment")
     public AppointmentDto getUserAppointment(@RequestParam(value = "departmentId") Long departmentId,
                                              @RequestParam(value = "userId") UUID userId,
-                                             @RequestBody SimpleAppointmentDto simpleAppointmentDto) {
+                                             @RequestBody SimpleAppointmentDto simpleAppointmentDto)
+            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
 
         return appointmentService.getUserAppointment(departmentId, userId, simpleAppointmentDto);
     }
