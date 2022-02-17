@@ -42,11 +42,11 @@ public class AppointmentController {
     @PostMapping("/reserving")
     public ResponseEntity<String> appointmentReservation(@RequestParam(value = "departmentId") Long departmentId,
                                                   @RequestParam(value = "userId") UUID userId,
-                                                  @RequestBody SimpleAppointmentDto simpleAppointmentDto)
+                                                  @RequestBody AppointmentDto appointmentDto)
             throws ApiNoSuchElementException, ApiAlreadyExistException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
 
         return new ResponseEntity<>(
-                appointmentService.appointmentReservation(departmentId, userId, simpleAppointmentDto),
+                appointmentService.appointmentReservation(departmentId, userId, appointmentDto),
                 HttpStatus.CREATED);
     }
 
