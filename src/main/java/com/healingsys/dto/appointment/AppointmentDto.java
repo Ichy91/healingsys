@@ -11,7 +11,8 @@ import java.time.LocalTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SaveAppointmentDto {
+public class AppointmentDto {
+    private Long id;
     private LocalDate date;
     private LocalTime hour;
     private AppointmentStatus status;

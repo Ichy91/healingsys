@@ -12,7 +12,6 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SimpleAppointmentDto {
-    private Long id;
     private LocalDate date;
     private LocalTime hour;
     private AppointmentStatus status;
