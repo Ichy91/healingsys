@@ -122,7 +122,7 @@ public class AppointmentManagerService {
                         "You had an reserved appointment on %s %s and %s for status: %s!",
                                 appointment.getDate(),
                                 appointment.getHour(),
-                                appointmentService.updateAppointment(appointment),
+                                appointmentService.update(appointment),
                                 AppointmentStatus.MISSED));
             }
         }
