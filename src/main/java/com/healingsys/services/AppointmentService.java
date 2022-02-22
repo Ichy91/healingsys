@@ -177,11 +177,13 @@ public class AppointmentService {
         checkValues(mapToEntity(appointmentDto));
 
         AppointmentStatus status = appointmentDto.getStatus();
-        String content = String.format("%s it does not exist!", status);
+        String content = null;
         HttpStatus httpStatus = HttpStatus.ACCEPTED;
 
-        if (status.equals(AppointmentStatus.RESERVED))
+        if (status.equals(AppointmentStatus.RESERVED)) {
             content = appointmentReservation(departmentId, userId, appointmentDto);
+            httpStatus = HttpStatus.CREATED;
+        }
 
         else if (status.equals(AppointmentStatus.CANCELED))
             content = appointmentUpdater(appointmentDto, AppointmentStatus.CANCELED);
@@ -191,9 +193,6 @@ public class AppointmentService {
 
         else if (status.equals(AppointmentStatus.COMPLETED))
             content = appointmentUpdater(appointmentDto, AppointmentStatus.COMPLETED);
-
-        else
-            httpStatus = HttpStatus.BAD_REQUEST;
 
         return new ResponseEntity<>(content, httpStatus);
     }
@@ -251,6 +250,9 @@ public class AppointmentService {
 
         else if (status == null)
             throw new ApiNoContentException("Empty the Appointment status!");
+
+        else if (!List.of(AppointmentStatus.values()).contains(status))
+            throw new ApiIllegalArgumentException(String.format("%s it does not exist!", status));
 
         else if (!departmentHours.contains(hour))
             throw new ApiIllegalArgumentException(String.format(
