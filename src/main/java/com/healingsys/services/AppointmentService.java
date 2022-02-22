@@ -194,6 +194,8 @@ public class AppointmentService {
         else if (status.equals(AppointmentStatus.COMPLETED))
             content = appointmentUpdater(appointmentDto, AppointmentStatus.COMPLETED);
 
+        else httpStatus = HttpStatus.BAD_REQUEST;
+
         return new ResponseEntity<>(content, httpStatus);
     }
 
