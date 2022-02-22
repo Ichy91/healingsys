@@ -39,11 +39,11 @@ public class AppointmentController {
         return appointmentService.getUserAppointment(departmentId, userId, simpleAppointmentDto);
     }
 
-
+    //Use Patients
     @PostMapping("/reserving")
     public ResponseEntity<String> appointmentReservation(@RequestParam(value = "departmentId") Long departmentId,
-                                                  @RequestParam(value = "userId") UUID userId,
-                                                  @RequestBody AppointmentDto appointmentDto)
+                                                         @RequestParam(value = "userId") UUID userId,
+                                                         @RequestBody AppointmentDto appointmentDto)
             throws ApiNoSuchElementException, ApiAlreadyExistException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
 
         return new ResponseEntity<>(
@@ -51,19 +51,23 @@ public class AppointmentController {
                 HttpStatus.CREATED);
     }
 
-
+    //Use Patients
     @PutMapping("/canceling")
     public ResponseEntity<String> appointmentCanceling(@RequestBody AppointmentDto appointmentDto)
             throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
 
         return new ResponseEntity<>(
                 appointmentService.appointmentCanceling(appointmentDto),
-                HttpStatus.CREATED);
+                HttpStatus.ACCEPTED);
     }
 
-
+    //Use User, SuperUser, Admin
     @PutMapping("/update")
-    public ResponseEntity<String> updateAppointment(@RequestBody AppointmentDto appointmentDto) {
-        return null;
+    public ResponseEntity<String> updateAppointment(@RequestParam(value = "departmentId", required = false) Long departmentId,
+                                                    @RequestParam(value = "userId", required = false) UUID userId,
+                                                    @RequestBody AppointmentDto appointmentDto)
+            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
+
+        return appointmentService.updateAppointmentHandler(departmentId, userId, appointmentDto);
     }
 }
