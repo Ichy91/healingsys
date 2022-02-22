@@ -10,6 +10,8 @@ import com.healingsys.repositories.AppointmentRepository;
 import com.healingsys.util.DataHandler;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -146,7 +148,7 @@ public class AppointmentService {
         checkClosedHours(appointment);
     }
 
-    private void checkClosedHours(Appointment appointment) {
+    private void checkClosedHours(Appointment appointment) throws ApiIllegalMethodException {
         Long departmentId = appointment.getDepartment().getId();
         LocalDate date = appointment.getDate();
         List<ClosedTime> closedAppointments = closedTimeService.getClosedEntitiesByDepartmentAndDay(departmentId, date);
@@ -165,18 +167,48 @@ public class AppointmentService {
     //Canceling
     public String appointmentCanceling(AppointmentDto appointmentDto)
             throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
-        Appointment appointmentToCancel = mapToEntity(appointmentDto);
+        checkValues(mapToEntity(appointmentDto));
+        return appointmentUpdater(appointmentDto, AppointmentStatus.CANCELED);
+    }
+
+    //Updating
+    public ResponseEntity<String> updateAppointmentHandler(Long departmentId, UUID userId, AppointmentDto appointmentDto)
+            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
+        checkValues(mapToEntity(appointmentDto));
+
+        AppointmentStatus status = appointmentDto.getStatus();
+        String content = String.format("%s it does not exist!", status);
+        HttpStatus httpStatus = HttpStatus.ACCEPTED;
+
+        if (status.equals(AppointmentStatus.RESERVED))
+            content = appointmentReservation(departmentId, userId, appointmentDto);
+
+        else if (status.equals(AppointmentStatus.CANCELED))
+            content = appointmentUpdater(appointmentDto, AppointmentStatus.CANCELED);
+
+        else if (status.equals(AppointmentStatus.MISSED))
+            content = appointmentUpdater(appointmentDto, AppointmentStatus.MISSED);
+
+        else if (status.equals(AppointmentStatus.COMPLETED))
+            content = appointmentUpdater(appointmentDto, AppointmentStatus.COMPLETED);
+
+        else
+            httpStatus = HttpStatus.BAD_REQUEST;
+
+        return new ResponseEntity<>(content, httpStatus);
+    }
+
+    public String appointmentUpdater(AppointmentDto appointmentDto, AppointmentStatus status) {
+        Appointment appointmentToUpdate = mapToEntity(appointmentDto);
         Appointment appointmentFromDb;
 
-        checkValues(appointmentToCancel);
+        appointmentFromDb = appointmentRepository.getById(appointmentToUpdate.getId());
+        appointmentToUpdate.setUser(appointmentFromDb.getUser());
+        appointmentToUpdate.setDepartment(appointmentFromDb.getDepartment());
 
-        appointmentFromDb = appointmentRepository.getById(appointmentToCancel.getId());
-        appointmentToCancel.setUser(appointmentFromDb.getUser());
-        appointmentToCancel.setDepartment(appointmentFromDb.getDepartment());
-
-        if (!appointmentToCancel.getStatus().equals(AppointmentStatus.CANCELED))
+        if (!appointmentToUpdate.getStatus().equals(status))
             throw new ApiIllegalMethodException(String.format(
-                    "%s method not supported in the Canceling!", appointmentToCancel.getStatus()));
+                    "%s method not supported in the %s method!", appointmentToUpdate.getStatus(), status));
 
         return String.format("%s\n" +
                         "User: %s\n" +
@@ -184,15 +216,14 @@ public class AppointmentService {
                         "Date: %s\n" +
                         "Hour: %s\n" +
                         "Status: %s",
-                update(appointmentToCancel),
-                appointmentToCancel.getUser().getName(),
-                appointmentToCancel.getDepartment().getName(),
-                appointmentToCancel.getDate(),
-                appointmentToCancel.getHour(),
-                appointmentToCancel.getStatus());
+                update(appointmentToUpdate),
+                appointmentToUpdate.getUser().getName(),
+                appointmentToUpdate.getDepartment().getName(),
+                appointmentToUpdate.getDate(),
+                appointmentToUpdate.getHour(),
+                appointmentToUpdate.getStatus());
     }
 
-    //Updating
     public String update(Appointment appointment) {
         appointmentRepository.save(appointment);
 
