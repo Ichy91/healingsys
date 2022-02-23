@@ -2,10 +2,10 @@ package com.healingsys.controllers;
 
 import com.healingsys.dto.department.DepartmentDetailsDto;
 import com.healingsys.dto.department.SimpleDepartmentDetailsDto;
-import com.healingsys.exception.ApiAlreadyExistException;
-import com.healingsys.exception.ApiIllegalArgumentException;
-import com.healingsys.exception.ApiNoContentException;
-import com.healingsys.exception.ApiNoSuchElementException;
+import com.healingsys.exceptions.ApiAlreadyExistException;
+import com.healingsys.exceptions.ApiIllegalArgumentException;
+import com.healingsys.exceptions.ApiNoContentException;
+import com.healingsys.exceptions.ApiNoSuchElementException;
 import com.healingsys.services.DepartmentDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

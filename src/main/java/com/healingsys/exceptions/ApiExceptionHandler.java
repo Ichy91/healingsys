@@ -1,4 +1,4 @@
-package com.healingsys.exception;
+package com.healingsys.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

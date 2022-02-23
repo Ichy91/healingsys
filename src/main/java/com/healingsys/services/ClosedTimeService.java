@@ -3,7 +3,7 @@ package com.healingsys.services;
 import com.healingsys.dto.closedTime.ClosedAppointmentDto;
 import com.healingsys.dto.department.SimpleDepartmentDetailsDto;
 import com.healingsys.entities.ClosedTime;
-import com.healingsys.exception.*;
+import com.healingsys.exceptions.*;
 import com.healingsys.repositories.ClosedTimeRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;

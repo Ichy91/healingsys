@@ -1,7 +1,7 @@
 package com.healingsys.services;
 
 import com.healingsys.entities.User;
-import com.healingsys.exception.ApiNoSuchElementException;
+import com.healingsys.exceptions.ApiNoSuchElementException;
 import com.healingsys.repositories.UserRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

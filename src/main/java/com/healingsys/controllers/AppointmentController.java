@@ -1,7 +1,8 @@
 package com.healingsys.controllers;
 
-import com.healingsys.dto.appointment.SaveAppointmentDto;
-import com.healingsys.exception.*;
+import com.healingsys.dto.appointment.SimpleAppointmentDto;
+import com.healingsys.dto.appointment.AppointmentDto;
+import com.healingsys.exceptions.*;
 import com.healingsys.services.AppointmentManagerService;
 import com.healingsys.services.AppointmentService;
 import com.healingsys.util.Day;
@@ -28,21 +29,45 @@ public class AppointmentController {
         return appointmentManagerService.appointmentHandler(departmentId, userId);
     }
 
+
+    @GetMapping("/userAppointment")
+    public AppointmentDto getUserAppointment(@RequestParam(value = "departmentId") Long departmentId,
+                                             @RequestParam(value = "userId") UUID userId,
+                                             @RequestBody SimpleAppointmentDto simpleAppointmentDto)
+            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
+
+        return appointmentService.getUserAppointment(departmentId, userId, simpleAppointmentDto);
+    }
+
+    //Use Patients
     @PostMapping("/reserving")
     public ResponseEntity<String> appointmentReservation(@RequestParam(value = "departmentId") Long departmentId,
-                                                  @RequestParam(value = "userId") UUID userId,
-                                                  @RequestBody SaveAppointmentDto saveAppointmentDto)
+                                                         @RequestParam(value = "userId") UUID userId,
+                                                         @RequestBody AppointmentDto appointmentDto)
             throws ApiNoSuchElementException, ApiAlreadyExistException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
 
         return new ResponseEntity<>(
-                appointmentService.appointmentReservation(departmentId, userId, saveAppointmentDto),
+                appointmentService.appointmentReservation(departmentId, userId, appointmentDto),
                 HttpStatus.CREATED);
     }
 
+    //Use Patients
+    @PutMapping("/canceling")
+    public ResponseEntity<String> appointmentCanceling(@RequestBody AppointmentDto appointmentDto)
+            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
+
+        return new ResponseEntity<>(
+                appointmentService.appointmentCanceling(appointmentDto),
+                HttpStatus.ACCEPTED);
+    }
+
+    //Use User, SuperUser, Admin
     @PutMapping("/update")
-    public ResponseEntity<String> updateAppointment(@RequestParam(value = "departmentId") Long departmentId,
-                                                    @RequestParam(value = "userId") UUID userId,
-                                                    @RequestBody SaveAppointmentDto saveAppointmentDto) {
-        return null;
+    public ResponseEntity<String> updateAppointment(@RequestParam(value = "departmentId", required = false) Long departmentId,
+                                                    @RequestParam(value = "userId", required = false) UUID userId,
+                                                    @RequestBody AppointmentDto appointmentDto)
+            throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
+
+        return appointmentService.updateAppointmentHandler(departmentId, userId, appointmentDto);
     }
 }
