@@ -36,7 +36,7 @@ public class AppointmentController {
                                              @RequestBody SimpleAppointmentDto simpleAppointmentDto)
             throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
 
-        return appointmentService.getUserAppointment(departmentId, userId, simpleAppointmentDto);
+        return appointmentService.getUserAppointmentDto(departmentId, userId, simpleAppointmentDto);
     }
 
     //Use Patients
