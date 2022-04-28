@@ -27,6 +27,6 @@ public class ClosedTime {
     private LocalTime closedTo;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "department_details_id", referencedColumnName = "id")
-    private DepartmentDetails departmentDetails;
+    @JoinColumn(name = "department_id", referencedColumnName = "id")
+    private Department department;
 }

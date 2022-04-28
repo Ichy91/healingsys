@@ -1,12 +1,12 @@
 package com.healingsys.controllers;
 
-import com.healingsys.dto.department.DepartmentDetailsDto;
-import com.healingsys.dto.department.SimpleDepartmentDetailsDto;
+import com.healingsys.dto.department.DepartmentDto;
+import com.healingsys.dto.department.SimpleDepartmentDto;
 import com.healingsys.exceptions.ApiAlreadyExistException;
 import com.healingsys.exceptions.ApiIllegalArgumentException;
 import com.healingsys.exceptions.ApiNoContentException;
 import com.healingsys.exceptions.ApiNoSuchElementException;
-import com.healingsys.services.DepartmentDetailsService;
+import com.healingsys.services.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,48 +17,48 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/department")
-public class DepartmentDetailsController {
-    private final DepartmentDetailsService departmentDetailsService;
+public class DepartmentController {
+    private final DepartmentService departmentService;
 
 
     @GetMapping("/actives")
-    public List<SimpleDepartmentDetailsDto> getActiveDepartmentDetails()
+    public List<SimpleDepartmentDto> getActiveDepartmentDetails()
             throws ApiNoSuchElementException {
 
-        return departmentDetailsService.getAllActive();
+        return departmentService.getAllActive();
     }
 
 
     @GetMapping("/inactivates")
-    public List<SimpleDepartmentDetailsDto> getInactiveDepartmentDetails()
+    public List<SimpleDepartmentDto> getInactiveDepartmentDetails()
             throws ApiNoSuchElementException {
 
-        return departmentDetailsService.getAllInactive();
+        return departmentService.getAllInactive();
     }
 
 
     @GetMapping("/deleted")
-    public List<SimpleDepartmentDetailsDto> getDeletedDepartmentDetails()
+    public List<SimpleDepartmentDto> getDeletedDepartmentDetails()
             throws ApiNoSuchElementException {
 
-        return departmentDetailsService.getAllDeleted();
+        return departmentService.getAllDeleted();
     }
 
 
     @GetMapping("/{id}")
-    public DepartmentDetailsDto getDepartmentDetailsById(@PathVariable Long id)
+    public DepartmentDto getDepartmentDetailsById(@PathVariable Long id)
             throws ApiNoSuchElementException {
 
-        return departmentDetailsService.getDepartmentDtoById(id);
+        return departmentService.getDepartmentDtoById(id);
     }
 
 
     @PostMapping("/add")
-    public ResponseEntity<String> addDepartmentDetails(@RequestBody DepartmentDetailsDto departmentDetailsDto)
+    public ResponseEntity<String> addDepartmentDetails(@RequestBody DepartmentDto departmentDto)
             throws ApiAlreadyExistException, ApiIllegalArgumentException, ApiNoContentException {
 
         return new ResponseEntity<>(
-                departmentDetailsService.saveDepartmentDetails(departmentDetailsDto),
+                departmentService.saveDepartmentDetails(departmentDto),
                 HttpStatus.CREATED);
     }
 
@@ -66,11 +66,11 @@ public class DepartmentDetailsController {
     @PutMapping("/update/{id}")
     public ResponseEntity<String> updateDepartmentDetails(
             @PathVariable Long id,
-            @RequestBody DepartmentDetailsDto departmentDetailsDto)
+            @RequestBody DepartmentDto departmentDto)
             throws ApiAlreadyExistException, ApiIllegalArgumentException, ApiNoContentException {
 
         return new ResponseEntity<>(
-                departmentDetailsService.updateDepartmentDetails(departmentDetailsDto, id),
+                departmentService.updateDepartmentDetails(departmentDto, id),
                 HttpStatus.ACCEPTED);
     }
 }

@@ -1,7 +1,7 @@
 package com.healingsys.controllers;
 
 import com.healingsys.dto.closedTime.ClosedAppointmentDto;
-import com.healingsys.dto.department.SimpleDepartmentDetailsDto;
+import com.healingsys.dto.department.SimpleDepartmentDto;
 import com.healingsys.exceptions.*;
 import com.healingsys.services.ClosedTimeService;
 import lombok.RequiredArgsConstructor;
@@ -46,11 +46,11 @@ public class ClosedTimeController {
 
     @PostMapping("/save")
     public ResponseEntity<String> addClosedAppointment(@RequestBody ClosedAppointmentDto closedAppointmentDto,
-                                                      @RequestBody SimpleDepartmentDetailsDto simpleDepartmentDetailsDto)
+                                                      @RequestBody SimpleDepartmentDto simpleDepartmentDto)
             throws ApiNoSuchElementException, ApiIllegalMethodException, ApiAlreadyExistException, ApiIllegalArgumentException {
 
         return new ResponseEntity<>(
-                closedTimeService.saveClosedAppointment(closedAppointmentDto, simpleDepartmentDetailsDto),
+                closedTimeService.saveClosedAppointment(closedAppointmentDto, simpleDepartmentDto),
                 HttpStatus.CREATED);
     }
 

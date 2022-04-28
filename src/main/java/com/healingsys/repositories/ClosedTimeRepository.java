@@ -11,11 +11,11 @@ import java.util.List;
 @Repository
 public interface ClosedTimeRepository extends JpaRepository<ClosedTime, Long> {
 
-    List<ClosedTime> findAllByDepartmentDetailsId(Long departmentId);
+    List<ClosedTime> findAllByDepartmentId(Long departmentId);
 
-    List<ClosedTime> findAllByDepartmentDetailsIdAndDateGreaterThanEqualOrderByDate(Long departmentId, LocalDate date);
+    List<ClosedTime> findAllByDepartmentIdAndDateGreaterThanEqualOrderByDate(Long departmentId, LocalDate date);
 
-    List<ClosedTime> findAllByDepartmentDetailsIdAndDateAndClosedFromAndClosedTo(Long departmentId, LocalDate date, LocalTime closedFrom, LocalTime closedTo);
+    List<ClosedTime> findAllByDepartmentIdAndDateAndClosedFromAndClosedTo(Long departmentId, LocalDate date, LocalTime closedFrom, LocalTime closedTo);
 
-    List<ClosedTime> findAllByDepartmentDetailsIdAndDateOrderByClosedFrom(Long departmentId, LocalDate date);
+    List<ClosedTime> findAllByDepartmentIdAndDateOrderByClosedFrom(Long departmentId, LocalDate date);
 }

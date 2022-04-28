@@ -26,7 +26,7 @@ public class Appointment {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "department_id", referencedColumnName = "id")
-    private DepartmentDetails department;
+    private Department department;
 
     @NotNull
     private LocalDate date;

@@ -1,14 +1,14 @@
 package com.healingsys.services;
 
-import com.healingsys.dto.department.DepartmentDetailsDto;
-import com.healingsys.dto.department.SimpleDepartmentDetailsDto;
-import com.healingsys.entities.DepartmentDetails;
+import com.healingsys.dto.department.DepartmentDto;
+import com.healingsys.dto.department.SimpleDepartmentDto;
+import com.healingsys.entities.Department;
 import com.healingsys.entities.enums.Status;
 import com.healingsys.exceptions.ApiAlreadyExistException;
 import com.healingsys.exceptions.ApiIllegalArgumentException;
 import com.healingsys.exceptions.ApiNoContentException;
 import com.healingsys.exceptions.ApiNoSuchElementException;
-import com.healingsys.repositories.DepartmentDetailsRepository;
+import com.healingsys.repositories.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -21,14 +21,14 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class DepartmentDetailsService {
-    private final DepartmentDetailsRepository departmentDetailsRepository;
+public class DepartmentService {
+    private final DepartmentRepository departmentRepository;
     private final ModelMapper mapper;
 
 
-    public List<SimpleDepartmentDetailsDto> getAllActive()
+    public List<SimpleDepartmentDto> getAllActive()
             throws ApiNoSuchElementException {
-        List<DepartmentDetails> actives = departmentDetailsRepository.findAllByStatus(Status.ACTIVE);
+        List<Department> actives = departmentRepository.findAllByStatus(Status.ACTIVE);
 
         if (actives.isEmpty())
             throw new ApiNoSuchElementException(String.format("There is no such %s Departments!", Status.ACTIVE));
@@ -37,9 +37,9 @@ public class DepartmentDetailsService {
     }
 
 
-    public List<SimpleDepartmentDetailsDto> getAllInactive()
+    public List<SimpleDepartmentDto> getAllInactive()
             throws ApiNoSuchElementException {
-        List<DepartmentDetails> inactivates = departmentDetailsRepository.findAllByStatus(Status.INACTIVE);
+        List<Department> inactivates = departmentRepository.findAllByStatus(Status.INACTIVE);
 
         if (inactivates.isEmpty())
             throw new ApiNoSuchElementException(String.format("There is no such %s Departments!", Status.INACTIVE));
@@ -48,9 +48,9 @@ public class DepartmentDetailsService {
     }
 
 
-    public List<SimpleDepartmentDetailsDto> getAllDeleted()
+    public List<SimpleDepartmentDto> getAllDeleted()
             throws ApiNoSuchElementException {
-        List<DepartmentDetails> deleted = departmentDetailsRepository.findAllByStatus(Status.DELETED);
+        List<Department> deleted = departmentRepository.findAllByStatus(Status.DELETED);
 
         if (deleted.isEmpty())
             throw new ApiNoSuchElementException(String.format("There is no such %s Departments!", Status.DELETED));
@@ -59,53 +59,53 @@ public class DepartmentDetailsService {
     }
 
 
-    public DepartmentDetailsDto getDepartmentDtoById(Long id)
+    public DepartmentDto getDepartmentDtoById(Long id)
             throws ApiNoSuchElementException {
 
         return mapToDepartmentDto(getById(id));
     }
 
 
-    public DepartmentDetails getEntityById(Long id)
+    public Department getEntityById(Long id)
             throws ApiNoSuchElementException {
 
         return getById(id);
     }
 
 
-    public String saveDepartmentDetails(DepartmentDetailsDto departmentDetailsDto)
+    public String saveDepartmentDetails(DepartmentDto departmentDto)
             throws ApiAlreadyExistException, ApiIllegalArgumentException, ApiNoContentException {
-        checkValues(departmentDetailsDto);
-        String departmentName = departmentDetailsDto.getName();
+        checkValues(departmentDto);
+        String departmentName = departmentDto.getName();
 
-        if (!departmentDetailsRepository.findAllByName(departmentName).isEmpty())
+        if (!departmentRepository.findAllByName(departmentName).isEmpty())
             throw new ApiAlreadyExistException("Department already exist!");
 
-        DepartmentDetails departmentDetails = mapToEntity(departmentDetailsDto);
-        departmentDetailsRepository.save(departmentDetails);
+        Department department = mapToEntity(departmentDto);
+        departmentRepository.save(department);
 
         return "Operation details saved!";
     }
 
 
-    public String updateDepartmentDetails(DepartmentDetailsDto departmentDetailsDto, Long id)
+    public String updateDepartmentDetails(DepartmentDto departmentDto, Long id)
             throws ApiNoSuchElementException, ApiIllegalArgumentException, ApiNoContentException {
-        if (departmentDetailsRepository.findById(id).isEmpty())
+        if (departmentRepository.findById(id).isEmpty())
             throw new ApiNoSuchElementException(String.format("No find Department with id: %s!", id));
 
-        checkValues(departmentDetailsDto);
+        checkValues(departmentDto);
 
-        DepartmentDetails departmentDetails = mapToEntity(departmentDetailsDto);
-        departmentDetails.setId(id);
-        departmentDetailsRepository.save(departmentDetails);
+        Department department = mapToEntity(departmentDto);
+        department.setId(id);
+        departmentRepository.save(department);
 
         return "Operation details updated!";
     }
 
 
-    private DepartmentDetails getById(Long departmentId)
+    private Department getById(Long departmentId)
             throws ApiNoSuchElementException {
-        Optional<DepartmentDetails> departmentDetails = departmentDetailsRepository.findById(departmentId);
+        Optional<Department> departmentDetails = departmentRepository.findById(departmentId);
 
         if (departmentDetails.isEmpty())
             throw new ApiNoSuchElementException(String.format("No find Department with id: %s!", departmentId));
@@ -114,19 +114,19 @@ public class DepartmentDetailsService {
     }
 
 
-    private void checkValues(DepartmentDetailsDto departmentDetailsDto)
+    private void checkValues(DepartmentDto departmentDto)
             throws ApiIllegalArgumentException, ApiNoContentException {
-        String departmentName = departmentDetailsDto.getName();
+        String departmentName = departmentDto.getName();
 
-        LocalTime opening = departmentDetailsDto.getOpening();
-        LocalTime closing = departmentDetailsDto.getClosing();
+        LocalTime opening = departmentDto.getOpening();
+        LocalTime closing = departmentDto.getClosing();
         LocalTime standard = LocalTime.of(0,0);
         Duration durationOfOpening = Duration.between(opening, standard);
         Duration durationOfClosing = Duration.between(closing, standard);
 
-        int maxGeneratedDays = departmentDetailsDto.getMaxGeneratedDays();
-        int slotMaxCapacity = departmentDetailsDto.getSlotMaxCapacity();
-        double slotLengthInHour = departmentDetailsDto.getSlotLengthInHour();
+        int maxGeneratedDays = departmentDto.getMaxGeneratedDays();
+        int slotMaxCapacity = departmentDto.getSlotMaxCapacity();
+        double slotLengthInHour = departmentDto.getSlotLengthInHour();
 
 
         if (departmentName == null || departmentName.equals(""))
@@ -161,25 +161,25 @@ public class DepartmentDetailsService {
     }
 
 
-    private List<SimpleDepartmentDetailsDto> createSimpleDtoList(List<DepartmentDetails> departmentDetailsList) {
-        List<SimpleDepartmentDetailsDto> simpleDepartmentDetailsDtoList = new ArrayList<>();
+    private List<SimpleDepartmentDto> createSimpleDtoList(List<Department> departmentList) {
+        List<SimpleDepartmentDto> simpleDepartmentDtoList = new ArrayList<>();
 
-        for (var operationDetails: departmentDetailsList) {
-            simpleDepartmentDetailsDtoList.add(mapToSimpleDto(operationDetails));
+        for (var operationDetails: departmentList) {
+            simpleDepartmentDtoList.add(mapToSimpleDto(operationDetails));
         }
 
-        return simpleDepartmentDetailsDtoList;
+        return simpleDepartmentDtoList;
     }
 
-    private SimpleDepartmentDetailsDto mapToSimpleDto(DepartmentDetails departmentDetails) {
-        return mapper.map(departmentDetails, SimpleDepartmentDetailsDto.class);
+    private SimpleDepartmentDto mapToSimpleDto(Department department) {
+        return mapper.map(department, SimpleDepartmentDto.class);
     }
 
-    private DepartmentDetailsDto mapToDepartmentDto(DepartmentDetails departmentDetails) {
-        return mapper.map(departmentDetails, DepartmentDetailsDto.class);
+    private DepartmentDto mapToDepartmentDto(Department department) {
+        return mapper.map(department, DepartmentDto.class);
     }
 
-    private DepartmentDetails mapToEntity(DepartmentDetailsDto departmentDetailsDto) {
-        return mapper.map(departmentDetailsDto, DepartmentDetails.class);
+    private Department mapToEntity(DepartmentDto departmentDto) {
+        return mapper.map(departmentDto, Department.class);
     }
 }

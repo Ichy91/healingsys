@@ -1,7 +1,7 @@
 package com.healingsys.util;
 
 import com.healingsys.entities.ClosedTime;
-import com.healingsys.entities.DepartmentDetails;
+import com.healingsys.entities.Department;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
@@ -11,7 +11,7 @@ import java.util.List;
 public class DataHandler {
 
     //Daily closed hours setting
-    public List<LocalTime> setupClosedHours(DepartmentDetails details, List<ClosedTime> closedAppointments, List<LocalTime> closedHours) {
+    public List<LocalTime> setupClosedHours(Department details, List<ClosedTime> closedAppointments, List<LocalTime> closedHours) {
         LocalTime startTime;
         LocalTime endTime;
         int slotLengthInMinute = (int) (details.getSlotLengthInHour() * 60);

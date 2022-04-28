@@ -3,7 +3,7 @@ package com.healingsys.util;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.healingsys.entities.Appointment;
 import com.healingsys.entities.ClosedTime;
-import com.healingsys.entities.DepartmentDetails;
+import com.healingsys.entities.Department;
 import com.healingsys.entities.enums.AppointmentStatus;
 import lombok.Data;
 
@@ -21,7 +21,7 @@ public class Day {
     @JsonIgnore
     private DataHandler dataHandler;
     @JsonIgnore
-    private DepartmentDetails details;
+    private Department details;
     @JsonIgnore
     private List<Appointment> appointments;
     @JsonIgnore
@@ -46,7 +46,7 @@ public class Day {
 
     public Day(List<Appointment> appointments,
                List<ClosedTime> closedAppointments,
-               DepartmentDetails details,
+               Department details,
                LocalDate day,
                DataHandler dataHandler) {
         this.appointments = appointments;

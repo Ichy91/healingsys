@@ -3,7 +3,7 @@ package com.healingsys.services;
 import com.healingsys.entities.Appointment;
 import com.healingsys.entities.ClosedTime;
 import com.healingsys.entities.DayOfWeek;
-import com.healingsys.entities.DepartmentDetails;
+import com.healingsys.entities.Department;
 import com.healingsys.entities.enums.AppointmentStatus;
 import com.healingsys.exceptions.ApiIllegalArgumentException;
 import com.healingsys.exceptions.ApiNoSuchElementException;
@@ -27,12 +27,12 @@ import java.util.UUID;
 public class AppointmentManagerService {
     private final AppointmentService appointmentService;
     private final ClosedTimeService closedTimeService;
-    private final DepartmentDetailsService departmentDetailsService;
+    private final DepartmentService departmentService;
     private final UserService userService;
     private final DataHandler dataHandler;
 
     private UUID userId;
-    private DepartmentDetails details;
+    private Department details;
     private List<Appointment> appointments;
     private List<ClosedTime> closedAppointments;
 
@@ -41,7 +41,7 @@ public class AppointmentManagerService {
 
     public List<Day> appointmentHandler(Long departmentId, UUID userId)
             throws ApiNoSuchElementException, ApiIllegalArgumentException, ApiNotCompletedException {
-        details = departmentDetailsService.getEntityById(departmentId);
+        details = departmentService.getEntityById(departmentId);
         listsInitialisation();
 
         appointmentsHandler(userId);

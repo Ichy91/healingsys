@@ -27,7 +27,7 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
 
     private final UserService userService;
-    private final DepartmentDetailsService departmentDetailsService;
+    private final DepartmentService departmentService;
     private final ClosedTimeService closedTimeService;
     private final DataHandler dataHandler;
     private final ModelMapper mapper;
@@ -41,11 +41,11 @@ public class AppointmentService {
         return appointmentRepository.findAllByDepartmentIdAndUserIdAndStatus(departmentId, userId, AppointmentStatus.RESERVED);
     }
 
-    public AppointmentDto getUserAppointment(Long departmentId, UUID userId, SimpleAppointmentDto simpleAppointmentDto)
+    public AppointmentDto getUserAppointmentDto(Long departmentId, UUID userId, SimpleAppointmentDto simpleAppointmentDto)
             throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
         Appointment appointment = mapToEntity(simpleAppointmentDto);
         appointment.setUser(userService.getById(userId));
-        appointment.setDepartment(departmentDetailsService.getEntityById(departmentId));
+        appointment.setDepartment(departmentService.getEntityById(departmentId));
 
         checkValues(appointment);
 
@@ -84,7 +84,7 @@ public class AppointmentService {
             throws ApiNoSuchElementException, ApiAlreadyExistException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
         Appointment newAppointment = mapToEntity(appointmentDto);
         newAppointment.setUser(userService.getById(userId));
-        newAppointment.setDepartment(departmentDetailsService.getEntityById(departmentId));
+        newAppointment.setDepartment(departmentService.getEntityById(departmentId));
 
         checkValues(newAppointment);
 
@@ -95,7 +95,8 @@ public class AppointmentService {
 
         appointmentRepository.save(newAppointment);
 
-        return String.format("Appointment reserved!\n" +
+        return String.format(
+                "Appointment reserved!\n" +
                 "Patient: %s\n" +
                 "Department: %s\n" +
                 "Date: %s\n" +
@@ -167,14 +168,28 @@ public class AppointmentService {
     //Canceling
     public String appointmentCanceling(AppointmentDto appointmentDto)
             throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
-        checkValues(mapToEntity(appointmentDto));
-        return appointmentUpdater(appointmentDto, AppointmentStatus.CANCELED);
+        Appointment appointment;
+
+        if(appointmentRepository.findById(appointmentDto.getId()).isEmpty())
+            throw new ApiNoSuchElementException(String.format("Appointment not found with id: %s!", appointmentDto.getId()));
+
+        appointment = appointmentRepository.getById(appointmentDto.getId());
+
+        appointment.setStatus(appointmentDto.getStatus());
+
+        checkValues(appointment);
+
+        return appointmentUpdater(appointment, AppointmentStatus.CANCELED);
     }
 
     //Updating
     public ResponseEntity<String> updateAppointmentHandler(Long departmentId, UUID userId, AppointmentDto appointmentDto)
             throws ApiNoSuchElementException, ApiNoContentException, ApiIllegalArgumentException, ApiIllegalMethodException {
-        checkValues(mapToEntity(appointmentDto));
+        Appointment appointment = mapToEntity(appointmentDto);
+        appointment.setUser(userService.getById(userId));
+        appointment.setDepartment(departmentService.getEntityById(departmentId));
+
+        checkValues(appointment);
 
         AppointmentStatus status = appointmentDto.getStatus();
         String content = null;
@@ -186,26 +201,21 @@ public class AppointmentService {
         }
 
         else if (status.equals(AppointmentStatus.CANCELED))
-            content = appointmentUpdater(appointmentDto, AppointmentStatus.CANCELED);
+            content = appointmentUpdater(appointment, AppointmentStatus.CANCELED);
 
         else if (status.equals(AppointmentStatus.MISSED))
-            content = appointmentUpdater(appointmentDto, AppointmentStatus.MISSED);
+            content = appointmentUpdater(appointment, AppointmentStatus.MISSED);
 
         else if (status.equals(AppointmentStatus.COMPLETED))
-            content = appointmentUpdater(appointmentDto, AppointmentStatus.COMPLETED);
+            content = appointmentUpdater(appointment, AppointmentStatus.COMPLETED);
 
         else httpStatus = HttpStatus.BAD_REQUEST;
 
         return new ResponseEntity<>(content, httpStatus);
     }
 
-    public String appointmentUpdater(AppointmentDto appointmentDto, AppointmentStatus status) {
-        Appointment appointmentToUpdate = mapToEntity(appointmentDto);
-        Appointment appointmentFromDb;
-
-        appointmentFromDb = appointmentRepository.getById(appointmentToUpdate.getId());
-        appointmentToUpdate.setUser(appointmentFromDb.getUser());
-        appointmentToUpdate.setDepartment(appointmentFromDb.getDepartment());
+    private String appointmentUpdater(Appointment appointmentToUpdate, AppointmentStatus status)
+            throws ApiIllegalMethodException {
 
         if (!appointmentToUpdate.getStatus().equals(status))
             throw new ApiIllegalMethodException(String.format(
@@ -226,6 +236,8 @@ public class AppointmentService {
     }
 
     public String update(Appointment appointment) {
+        checkValues(appointment);
+
         appointmentRepository.save(appointment);
 
         return "The appointment updated!";
